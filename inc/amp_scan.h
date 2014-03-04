@@ -99,7 +99,7 @@ namespace amp_algorithms
             const int size = out.extent[0];
             assert(size >= _details::warp_size);
             auto compute_domain = concurrency::extent<1>(size).tile<TileSize>().pad();
-            concurrency::array<T, 1> tile_results(compute_domain);// / TileSize);
+            concurrency::array<T, 1> tile_results(compute_domain / TileSize);
 
             // 1 & 2. Scan all tiles and store results in tile_results.
             concurrency::parallel_for_each(compute_domain,
@@ -114,7 +114,6 @@ namespace amp_algorithms
                 if (tidx.local[0] == (TileSize - 1))
                 {
                     tile_results[tidx.tile[0]] = val;
-
                     if (_Mode == scan_mode::exclusive)
                         tile_results[tidx.tile[0]] += in[tidx.global[0]];
                 }
@@ -122,21 +121,25 @@ namespace amp_algorithms
             });
 
             // 3. Scan tile results.
-            // TODO: Fix this. Right now it will only work if there are no more than TileSize tiles.
-            concurrency::parallel_for_each(compute_domain,
-                [=, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
+            if (tile_results.extent[0] > TileSize)
             {
-                tile_static T tile_data[TileSize];
-                tile_data[tidx.local[0]] = tile_results[tidx.global[0]];
-                tidx.barrier.wait_with_tile_static_memory_fence();
+                scan_new<TileSize, amp_algorithms::scan_mode::exclusive>(tile_results, tile_results, op);
+            }
+            else
+            {
+                concurrency::parallel_for_each(compute_domain,
+                    [=, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
+                {
+                    tile_static T tile_data[TileSize];
+                    tile_data[tidx.local[0]] = tile_results[tidx.global[0]];
+                    tidx.barrier.wait_with_tile_static_memory_fence();
 
-                _details::scan_tile<TileSize, amp_algorithms::scan_mode::exclusive>(tile_data, tidx, amp_algorithms::plus<T>());
+                    _details::scan_tile<TileSize, amp_algorithms::scan_mode::exclusive>(tile_data, tidx, amp_algorithms::plus<T>());
 
-                tile_results[tidx.global[0]] = tile_data[tidx.local[0]];
-                tidx.barrier.wait_with_tile_static_memory_fence();
-            });
-            std::cerr << tile_results << std::endl;
-
+                    tile_results[tidx.global[0]] = tile_data[tidx.local[0]];
+                    tidx.barrier.wait_with_tile_static_memory_fence();
+                });
+            }
             // 4. Add the tile results to the individual results for each tile.
             concurrency::parallel_for_each(compute_domain,
                 [=, &out, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)

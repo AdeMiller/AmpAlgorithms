@@ -164,6 +164,18 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result, 36).c_str());
         }
 
+        TEST_METHOD(amp_scan_exclusive_overlapped_input_and_output)
+        {
+            std::vector<int> input(1024);
+            generate_data(input);
+            std::vector<int> expected(input.size());
+            scan_sequential_exclusive(begin(input), end(input), begin(expected));
+
+            scan_exclusive_new<128>(begin(input), end(input), begin(input));
+
+            Assert::IsTrue(expected == input, Msg(expected, input).c_str());
+        }
+
         TEST_METHOD(amp_scan_inclusive_overlapped_input_and_output)
         {
             std::vector<int> input(1024);
@@ -176,9 +188,33 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == input, Msg(expected, input).c_str());
         }
 
+        TEST_METHOD(amp_scan_exclusive_recursive_scan)
+        {
+            std::vector<int> input(32 * (32 + 2), 1);
+            std::vector<int> result(input.size(), -1);
+            std::vector<int> expected(input.size()); 
+            std::iota(begin(expected), end(expected), 0);
+
+            scan_exclusive_new<32>(begin(input), end(input), begin(result));
+
+            Assert::IsTrue(expected == result, Msg(expected, result).c_str());
+        }
+
+        TEST_METHOD(amp_scan_inclusive_recursive_scan)
+        {
+            std::vector<int> input(32 * (32 + 2), 1);
+            std::vector<int> result(input.size(), -1);
+            std::vector<int> expected(input.size());
+            std::iota(begin(expected), end(expected), 1);
+
+            scan_inclusive_new<32>(begin(input), end(input), begin(result));
+
+            Assert::IsTrue(expected == result, Msg(expected, result).c_str());
+        }
+
         TEST_METHOD(amp_scan_exclusive)
         {
-            std::vector<int> input(1024);
+            std::vector<int> input(128 * (128 + 10));
             generate_data(input);
             std::vector<int> result(input.size(), -1);
             std::vector<int> expected(input.size());
@@ -191,7 +227,7 @@ namespace amp_algorithms_tests
 
         TEST_METHOD(amp_scan_inclusive)
         {
-            std::vector<int> input(1024);
+            std::vector<int> input(128 * (128 + 10));
             generate_data(input);
             std::vector<int> result(input.size(), -1);
             std::vector<int> expected(input.size());
@@ -201,6 +237,5 @@ namespace amp_algorithms_tests
 
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
-
     };
 }
