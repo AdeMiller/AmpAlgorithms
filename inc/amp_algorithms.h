@@ -309,32 +309,20 @@ namespace amp_algorithms
     // Padded tile read and write functions.
     //----------------------------------------------------------------------------
 
-    template <typename T, int N>
-    inline T padded_read(const concurrency::array_view<T, N> arr, const concurrency::index<N> idx) restrict(cpu, amp)
+    template <typename TContainer, int N>
+    inline typename TContainer::value_type padded_read(const TContainer& arr, const concurrency::index<N> idx) restrict(cpu, amp)
     {
-        return arr.extent.contains(idx) ? arr[idx] : T();
+        return arr.extent.contains(idx) ? arr[idx] : typename TContainer::value_type();
     }
 
-    template <typename T>
-    inline T padded_read(const concurrency::array_view<T> arr, const int idx) restrict(cpu, amp)
+    template <typename TContainer>
+    inline typename TContainer::value_type padded_read(const TContainer& arr, const int idx) restrict(cpu, amp)
     {
-        return padded_read<T, 1>(arr, concurrency::index<1>(idx));
+        return padded_read<TContainer, 1>(arr, concurrency::index<1>(idx));
     }
 
-    template <typename T, int N>
-    inline T padded_read(const concurrency::array<T, N>& arr, const concurrency::index<N> idx) restrict(cpu, amp)
-    {
-        return arr.extent.contains(idx) ? arr[idx] : T();
-    }
-
-    template <typename T>
-    inline T padded_read(const concurrency::array<T>& arr, const int idx) restrict(cpu, amp)
-    {
-        return padded_read<T, 1>(arr, concurrency::index<1>(idx));
-    }
-
-    template <typename T, int N>
-    inline void padded_write(const concurrency::array_view<T, N> arr, const concurrency::index<N> idx, const T& value) restrict(cpu, amp)
+    template <typename TContainer, int N>
+    inline void padded_write(TContainer& arr, const concurrency::index<N> idx, const typename TContainer::value_type &value) restrict(cpu, amp)
     {
         if (arr.extent.contains(idx))
         {
@@ -342,25 +330,10 @@ namespace amp_algorithms
         }
     }
 
-    template <typename T>
-    inline void padded_write(const concurrency::array_view<T> arr, const int idx, const T& value) restrict(cpu, amp)
+    template <typename TContainer>
+    inline void padded_write(TContainer& arr, const int idx, const typename TContainer::value_type &value) restrict(cpu, amp)
     {
-        padded_write<T, 1>(arr, concurrency::index<1>(idx), value);
-    }
-
-    template <typename T, int N>
-    inline void padded_write(concurrency::array<T, N>& arr, const concurrency::index<N> idx, const T& value) restrict(cpu, amp)
-    {
-        if (arr.extent.contains(idx))
-        {
-            arr[idx] = value;
-        }
-    }
-
-    template <typename T>
-    inline void padded_write(concurrency::array<T>& arr, const int idx, const T& value) restrict(cpu, amp)
-    {
-        padded_write<T, 1>(arr, concurrency::index<1>(idx), value);
+        padded_write<TContainer, 1>(arr, concurrency::index<1>(idx), value);
     }
 
 #pragma endregion
