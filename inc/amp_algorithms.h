@@ -258,6 +258,39 @@ namespace amp_algorithms
     // Static operations
     //----------------------------------------------------------------------------
 
+    template<int N, unsigned int P = 0> 
+    struct log2
+    {
+        enum { value = log2<N / 2, P + 1>::value };
+    };
+
+    template <unsigned int P>
+    struct log2<0, P> 
+    { 
+        enum { value = P }; 
+    };
+
+    template <unsigned int P>
+    struct log2<1, P> 
+    { 
+        enum { value = P }; 
+    };
+
+    template<unsigned int N>
+    struct is_power_of_two
+    {
+        enum { value = ((count_bits<N, _details::Bit32>::value == 1) ? TRUE : FALSE) };
+    };
+
+    // While 1 is technically 2^0, for the purposes of calculating 
+    // tile size it isn't useful.
+
+    template <>
+    struct is_power_of_two<1>
+    {
+        enum { value = FALSE };
+    };
+
     namespace _details
     {
         static const unsigned int Bit08 = 0x80;
@@ -267,42 +300,20 @@ namespace amp_algorithms
         template<unsigned int N, int MaxBit>
         struct is_bit_set
         {
-            enum { result = (N & MaxBit) ? 1 : 0 };
+            enum { value = (N & MaxBit) ? 1 : 0 };
         };
-    }
-
-    template<unsigned int N>
-    struct is_power_of_two
-    {
-        enum
-        {
-            result = ((count_bits<N, _details::Bit32>::result == 1) ? TRUE : FALSE)
-        };
-    };
-
-    // While 1 is technically 2^0, for the purposes of calculating 
-    // tile size it isn't useful.
-
-    template <>
-    struct is_power_of_two<1>
-    {
-        enum { result = FALSE };
     };
 
     template<unsigned int N, unsigned int MaxBit>
     struct count_bits
     {
-        enum
-        {
-            result = (_details::is_bit_set<N, MaxBit>::result +
-            count_bits<N, (MaxBit >> 1)>::result)
-        };
+        enum { value = (_details::is_bit_set<N, MaxBit>::value + count_bits<N, (MaxBit >> 1)>::value) };
     };
 
     template<unsigned int N>
     struct count_bits<N, 0>
     {
-        enum { result = FALSE };
+        enum { value = FALSE };
     };
 
     //----------------------------------------------------------------------------

@@ -37,6 +37,8 @@ namespace amp_algorithms
         static const int warp_size = 32;
         static const int warp_max = _details::warp_size - 1;
 
+        // TODO: Scan still needs optimizing.
+
         template <scan_mode _Mode, typename _BinaryOp, typename T>
         T scan_warp(T* const p, const int idx, const _BinaryOp& op) restrict(amp)
         {
@@ -57,22 +59,23 @@ namespace amp_algorithms
         template <int TileSize, scan_mode _Mode, typename _BinaryOp, typename T>
         T scan_tile(T* const p, concurrency::tiled_index<TileSize> tidx, const _BinaryOp& op) restrict(amp)
         {
-            const int idx = tidx.local[0];
-            const int warp_id = idx >> 5;
-            const int widx = idx & _details::warp_max;
+            static_assert(is_power_of_two<warp_size>::value, "Warp size must be an exact power of 2.");
+            const int lidx = tidx.local[0];
+            const int widx = lidx & warp_max;
+            const int warp_id = lidx >> log2<warp_size>::value;
 
             // Step 1: Intra-warp scan in each warp
-            auto val = scan_warp<_Mode, _BinaryOp>(p, idx, op);
+            auto val = scan_warp<_Mode, _BinaryOp>(p, lidx, op);
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             // Step 2: Collect per-warp partial results
             if (widx == _details::warp_max)
-                p[warp_id] = p[idx];
+                p[warp_id] = p[lidx];
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             // Step 3: Use 1st warp to scan per-warp results
             if (warp_id == 0)
-                scan_warp<scan_mode::inclusive>(p, idx, op);
+                scan_warp<scan_mode::inclusive>(p, lidx, op);
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             // Step 4: Accumulate results from Steps 1 and 3
@@ -81,7 +84,7 @@ namespace amp_algorithms
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             // Step 5: Write and return the final result
-            p[idx] = val;
+            p[lidx] = val;
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             return val;
@@ -103,19 +106,21 @@ namespace amp_algorithms
             concurrency::parallel_for_each(compute_domain,
                 [=, &in, &out, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
             {
+                const int gidx = tidx.global[0];
+                const int lidx = tidx.local[0];
                 tile_static T tile_data[TileSize];
-                tile_data[tidx.local[0]] = padded_read(in, tidx.global[0]);
+                tile_data[lidx] = padded_read(in, gidx);
                 tidx.barrier.wait_with_tile_static_memory_fence();
 
                 auto val = _details::scan_tile<TileSize, _Mode>(tile_data, tidx, amp_algorithms::plus<T>());
 
-                if (tidx.local[0] == (TileSize - 1))
+                if (lidx == (TileSize - 1))
                 {
                     tile_results[tidx.tile[0]] = val;
                     if (_Mode == scan_mode::exclusive)
-                        tile_results[tidx.tile[0]] += in[tidx.global[0]];
+                        tile_results[tidx.tile[0]] += in[gidx];
                 }
-                padded_write(out, tidx.global[0], tile_data[tidx.local[0]]);
+                padded_write(out, gidx, tile_data[lidx]);
             });
 
             // 3. Scan tile results.
@@ -128,13 +133,15 @@ namespace amp_algorithms
                 concurrency::parallel_for_each(compute_domain,
                     [=, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
                 {
+                    const int gidx = tidx.global[0];
+                    const int lidx = tidx.local[0];
                     tile_static T tile_data[TileSize];
-                    tile_data[tidx.local[0]] = tile_results[tidx.global[0]];
+                    tile_data[lidx] = tile_results[gidx];
                     tidx.barrier.wait_with_tile_static_memory_fence();
 
                     _details::scan_tile<TileSize, amp_algorithms::scan_mode::exclusive>(tile_data, tidx, amp_algorithms::plus<T>());
 
-                    tile_results[tidx.global[0]] = tile_data[tidx.local[0]];
+                    tile_results[gidx] = tile_data[lidx];
                     tidx.barrier.wait_with_tile_static_memory_fence();
                 });
             }
@@ -142,13 +149,14 @@ namespace amp_algorithms
             concurrency::parallel_for_each(compute_domain,
                 [=, &out, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
             {
-                if (tidx.global[0] < size)
-                    out[tidx.global[0]] += tile_results[tidx.tile[0]];
+                const int gidx = tidx.global[0];
+                if (gidx < size)
+                    out[gidx] += tile_results[tidx.tile[0]];
             });
         }
     }
 
-    // TODO: Refactor this to remove duplicate code.
+    // TODO: Refactor this to remove duplicate code. Also need to decide on final API.
     template <int TileSize, typename InIt, typename OutIt>
     inline void scan_exclusive_new(InIt first, InIt last, OutIt dest_first)
     {
