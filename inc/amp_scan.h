@@ -44,12 +44,12 @@ namespace amp_algorithms
         {
             const int widx = idx & _details::warp_max;
 
-            // TODO: Unroll? Unroll for 32 wide warp or 64? Templated unroll?
             if (widx >= 1) p[idx] = op(p[idx - 1], p[idx]);
-            if (widx >= 2) p[idx] = op(p[idx - 2], p[idx]);
-            if (widx >= 4) p[idx] = op(p[idx - 4], p[idx]);
-            if (widx >= 8) p[idx] = op(p[idx - 8], p[idx]);
-            if (widx >= 16) p[idx] = op(p[idx - 16], p[idx]);
+            if (widx >= 2 && warp_size > 2) p[idx] = op(p[idx - 2], p[idx]);
+            if (widx >= 4 && warp_size > 4) p[idx] = op(p[idx - 4], p[idx]);
+            if (widx >= 8 && warp_size > 8) p[idx] = op(p[idx - 8], p[idx]);
+            if (widx >= 16 && warp_size > 16) p[idx] = op(p[idx - 16], p[idx]);
+            if (widx >= 32 && warp_size > 32) p[idx] = op(p[idx - 32], p[idx]);
 
             if (_Mode == scan_mode::inclusive)
                 return p[idx];
@@ -61,7 +61,6 @@ namespace amp_algorithms
         {
             static_assert(is_power_of_two<warp_size>::value, "Warp size must be an exact power of 2.");
             const int lidx = tidx.local[0];
-            const int widx = lidx & warp_max;
             const int warp_id = lidx >> log2<warp_size>::value;
 
             // Step 1: Intra-warp scan in each warp
@@ -69,7 +68,7 @@ namespace amp_algorithms
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             // Step 2: Collect per-warp partial results
-            if (widx == _details::warp_max)
+            if ((lidx & warp_max) == _details::warp_max)
                 p[warp_id] = p[lidx];
             tidx.barrier.wait_with_tile_static_memory_fence();
 
@@ -86,7 +85,6 @@ namespace amp_algorithms
             // Step 5: Write and return the final result
             p[lidx] = val;
             tidx.barrier.wait_with_tile_static_memory_fence();
-
             return val;
         }
 
@@ -113,7 +111,6 @@ namespace amp_algorithms
                 tidx.barrier.wait_with_tile_static_memory_fence();
 
                 auto val = _details::scan_tile<TileSize, _Mode>(tile_data, tidx, amp_algorithms::plus<T>());
-
                 if (lidx == (TileSize - 1))
                 {
                     tile_results[tidx.tile[0]] = val;
