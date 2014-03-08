@@ -42,6 +42,13 @@ namespace amp_algorithms
         inclusive = 1
     };
 
+    // TODO: Need to support forward and reverse scan directions and segmented scan for non-DX scan implementation.
+    enum class scan_direction : int
+    {
+        forward = 0,
+        backward = 1
+    };
+
     namespace _details
     {
         static const int warp_size = 32;

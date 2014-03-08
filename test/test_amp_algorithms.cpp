@@ -48,7 +48,7 @@ namespace amp_algorithms_details_tests
         {
             try
             {
-                amp_algorithms::_details::_check_hresult(E_FAIL, "Failed!");
+                amp_algorithms::direct3d::_details::_check_hresult(E_FAIL, "Failed!");
             }
             catch (runtime_exception& ex)
             {

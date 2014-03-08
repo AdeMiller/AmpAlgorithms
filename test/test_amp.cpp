@@ -126,7 +126,7 @@ namespace testtools_tests
         {
             auto data = std::vector<int>(5);
             std::iota(begin(data), end(data), 1);
-            auto data_vw = concurrency::array_view<int, 1>(data);
+            auto data_vw = concurrency::array_view<int, 1>(5, data.data());
             std::ostringstream stream;
             stream << data_vw;
             Assert::AreEqual("1,2,3,4,", stream.str().c_str());

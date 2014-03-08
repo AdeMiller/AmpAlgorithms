@@ -294,7 +294,7 @@ namespace amp_stl_algorithms
         });
 
         map_vw.synchronize();
-        amp_algorithms::scan s(element_count + 1);
+        amp_algorithms::direct3d::scan s(element_count + 1);
         s.scan_exclusive(map, map);
         dest_view.discard_data();
         concurrency::parallel_for_each(compute_domain, [=](concurrency::tiled_index<tile_size> tidx) restrict(amp)
