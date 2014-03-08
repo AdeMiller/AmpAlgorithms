@@ -23,7 +23,15 @@
 
 #include <amp.h>
 #include <assert.h>
-
+// Scan implementation using the same algorithm described here and used by the CUDPP library.
+//
+// https://research.nvidia.com/sites/default/files/publications/nvr-2008-003.pdf
+//
+// For a full overview of various scan implementations see:
+//
+// https://sites.google.com/site/duanemerrill/ScanTR2.pdf
+//
+// TODO: There may be some better scan implementations that are described in the second reference. Investigate.
 namespace amp_algorithms
 {
     enum class scan_mode : int
