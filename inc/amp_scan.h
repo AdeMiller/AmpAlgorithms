@@ -51,7 +51,11 @@ namespace amp_algorithms
 
     namespace _details
     {
+#ifdef USE_REF
+        static const int warp_size = 4;
+#else
         static const int warp_size = 32;
+#endif
         static const int warp_max = _details::warp_size - 1;
 
         // TODO: Scan still needs optimizing.
