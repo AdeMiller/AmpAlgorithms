@@ -20,9 +20,8 @@
 *---------------------------------------------------------------------------*/
 
 #include "stdafx.h"
-#include "amp_scan.h"
 #include "amp_stl_algorithms.h"
-#include "test_amp.h"
+#include "testtools.h"
 
 // Code coverage is optional and requires VS Premium or Ultimate.
 #ifdef CODECOVERAGE

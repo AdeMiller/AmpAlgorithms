@@ -30,7 +30,6 @@
 
 #include <amp_stl_algorithms.h>
 #include <amp_algorithms.h>
-#include "amp_scan.h"
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
@@ -312,4 +311,4 @@ namespace test_tools
             return &delim;
         }
     }
-}; // namespace test_tools
+}; // namespace testtools
