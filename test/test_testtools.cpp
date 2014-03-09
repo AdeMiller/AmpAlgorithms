@@ -35,7 +35,6 @@ using namespace concurrency;
 using namespace amp_stl_algorithms;
 using namespace test_tools;
 
-// TODO: Filename should match namespace
 namespace testtools_tests
 {
     TEST_CLASS(testtools_equality)
