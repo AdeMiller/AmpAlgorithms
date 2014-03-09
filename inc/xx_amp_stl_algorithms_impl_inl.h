@@ -598,8 +598,20 @@ namespace amp_stl_algorithms
     //----------------------------------------------------------------------------
 
     //----------------------------------------------------------------------------
-    // min, max,minmax, max_element, min_element, minmax_element
+    // min, max, minmax, max_element, min_element, minmax_element
     //----------------------------------------------------------------------------
+
+    template<typename T>
+    const T& max(const T& a, const T& b) restrict(cpu, amp)
+    {
+        return T();
+    }
+
+    template<typename T, typename Compare>
+    const T& max(const T& a, const T& b, Compare comp) restrict(cpu, amp)
+    {
+        return T();
+    }
 
     //----------------------------------------------------------------------------
     // mismatch
