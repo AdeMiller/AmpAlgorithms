@@ -28,7 +28,26 @@ using namespace concurrency;
 using namespace amp_algorithms::direct3d;
 using namespace test_tools;
 
-namespace amp_algorithms_tests
+namespace amp_algorithms_direct3d_details_tests
+{
+    // This tests an inlined function so don't exclude this from coverage.
+    TEST_CLASS(details_tests)
+    {
+        TEST_METHOD(amp_details_check_hresult)
+        {
+            try
+            {
+                amp_algorithms::direct3d::_details::_check_hresult(E_FAIL, "Failed!");
+            }
+            catch (runtime_exception& ex)
+            {
+                Assert::AreEqual(E_FAIL, ex.get_error_code());
+                Assert::AreEqual("Failed! 0x80004005.", ex.what());
+            }
+        }
+    };
+};
+namespace amp_algorithms_direct3d_tests
 {
     enum class scan_type
     {

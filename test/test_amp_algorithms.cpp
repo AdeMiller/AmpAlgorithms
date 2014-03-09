@@ -39,26 +39,6 @@ using namespace test_tools;
 
 // TODO: Add tests for indexable_view_traits
 
-namespace amp_algorithms_details_tests
-{
-    // This tests an inlined function so don't exclude this from coverage.
-    TEST_CLASS(details_tests)
-    {
-        TEST_METHOD(amp_details_check_hresult)
-        {
-            try
-            {
-                amp_algorithms::direct3d::_details::_check_hresult(E_FAIL, "Failed!");
-            }
-            catch (runtime_exception& ex)
-            {
-                Assert::AreEqual(E_FAIL, ex.get_error_code());
-                Assert::AreEqual("Failed! 0x80004005.", ex.what());
-            }
-        }
-    };
-};
-
 namespace amp_algorithms_tests
 {
     // This isn't a test, it's just a convenient way to determine which accelerator tests ran on.
