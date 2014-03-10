@@ -222,6 +222,8 @@ namespace test_tools
     //      std::vector<int> data(12, 1);
     //      cout << container_width(4) << data;
     //
+    // TODO: Should this stream support be part of the library. It seems pretty useful, for debugging and testing if nothing else.
+
     class container_width
     {
     public:

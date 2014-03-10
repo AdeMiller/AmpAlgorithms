@@ -273,6 +273,18 @@ namespace amp_algorithms
         }
     };
 
+    template<typename T>
+    std::pair<const T&, const T&> minmax(const T& a, const T& b) restrict(cpu, amp)
+    {
+        return (b < a) ? std::make_pair(b, a) : std::make_pair(a, b);
+    }
+
+    template<typename T, typename Compare>
+    std::pair<const T&, const T&> minmax(const T& a, const T& b, Compare comp) restrict(cpu, amp)
+    {
+        return std::make_pair<T, T>(a, b);
+    }
+
     //----------------------------------------------------------------------------
     // Logical operations
     //----------------------------------------------------------------------------

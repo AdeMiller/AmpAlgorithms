@@ -353,7 +353,7 @@ namespace amp_stl_algorithms
         Compare comp ); 
 
     //----------------------------------------------------------------------------
-    // min, max,minmax, max_element, min_element, minmax_element
+    // max_element, min_element, minmax_element
     //----------------------------------------------------------------------------
 
 #ifdef max
