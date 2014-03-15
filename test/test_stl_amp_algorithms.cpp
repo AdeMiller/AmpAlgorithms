@@ -102,38 +102,38 @@ namespace amp_stl_algorithms_tests
 
     TEST_CLASS(stl_algorithms_pair_tests)
     {
+        // TODO: Add more tests for pair<T, T>, casting etc.
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
             set_default_accelerator();
         }
 
         TEST_METHOD(stl_pair_property_accessors)
-        {
-            auto dat = array_view<amp_stl_algorithms::pair<int, int>>(1);
-            dat[0] = amp_stl_algorithms::pair<int, int>(1, 2);
+		{
+			amp_stl_algorithms::pair<int, int> dat(1, 2);
+            array_view<amp_stl_algorithms::pair<int, int>> dat_vw(1, &dat); 
  
-            concurrency::parallel_for_each(dat.extent, [=](concurrency::index<1> idx) restrict(amp)
+            concurrency::parallel_for_each(dat_vw.extent, [=](concurrency::index<1> idx) restrict(amp)
             {
-                amp_stl_algorithms::swap(dat[idx].first, dat[idx].second);
+                amp_stl_algorithms::swap(dat_vw[idx].first, dat_vw[idx].second);
             });
 
-            Assert::AreEqual(2, dat[0].first);
-            Assert::AreEqual(1, dat[0].second);
+            Assert::AreEqual(2, dat_vw[0].first);
+            Assert::AreEqual(1, dat_vw[0].second);
         }
 
         TEST_METHOD(stl_pair_copy)
         {
-            array_view<amp_stl_algorithms::pair<int, int>> dat(1);
-            dat[0] = amp_stl_algorithms::pair<int, int>(1, 2);
+			amp_stl_algorithms::pair<int, int> dat(1, 2);
+            auto dat_vw = array_view<amp_stl_algorithms::pair<int, int>>(1, &dat);
 
-            concurrency::parallel_for_each(dat.extent, [=](concurrency::index<1> idx) restrict(amp)
+            concurrency::parallel_for_each(dat_vw.extent, [=](concurrency::index<1> idx) restrict(amp)
             {
                 amp_stl_algorithms::pair<int, int> x(3, 4);
-                dat[idx] = x;
             });
 
-            Assert::AreEqual(3, dat[0].first);
-            Assert::AreEqual(4, dat[0].second);
+            Assert::AreEqual(3, dat_vw[0].first);
+            Assert::AreEqual(4, dat_vw[0].second);
         }
 
         TEST_METHOD(stl_pair_conversion_from_std_pair)
