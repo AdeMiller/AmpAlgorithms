@@ -37,6 +37,47 @@ using namespace concurrency;
 using namespace amp_stl_algorithms;
 using namespace test_tools;
 
+namespace Microsoft {
+    namespace VisualStudio {
+        namespace CppUnitTestFramework
+        {
+            // TODO: Are all these overloads required? Should be able to just have std::pair and rely on casting from amp_stl_algorithms::pair.
+            // TODO: Might want to  move ToString overloads into testtools and templatize them.
+            template<> 
+            static std::wstring ToString<std::pair<const int&, const int&>>(const std::pair<const int&, const int&>& v)
+            { 
+                std::wstringstream str;
+                str << v.first << ", " << v.second;
+                return str.str();
+            }
+
+            template<> 
+            static std::wstring ToString<std::pair<int, int>>(const std::pair<int, int>& v)
+            {
+                std::wstringstream str;
+                str << v.first << ", " << v.second;
+                return str.str();
+            }
+
+            template<>
+            static std::wstring ToString<std::pair<const int, const int>>(const std::pair<const int, const int>& v)
+            {
+                std::wstringstream str;
+                str << v.first << ", " << v.second;
+                return str.str();
+            }
+
+            template<> 
+            static std::wstring ToString<amp_stl_algorithms::pair<int, int>>(const amp_stl_algorithms::pair<int, int>& v)
+            {
+                std::wstringstream str;
+                str << v.first << ", " << v.second;
+                return str.str();
+            }
+        }
+    }
+}
+
 namespace amp_stl_algorithms_tests
 {
     // This isn't a test, it's just a convenient way to determine which accelerator tests ran on.
@@ -58,6 +99,63 @@ namespace amp_stl_algorithms_tests
     };
     
     // TODO: Get the tests, header and internal implementations into the same logical order.
+
+    TEST_CLASS(stl_algorithms_pair_tests)
+    {
+        TEST_CLASS_INITIALIZE(initialize_tests)
+        {
+            set_default_accelerator();
+        }
+
+        TEST_METHOD(stl_pair_property_accessors)
+        {
+            auto dat = array_view<amp_stl_algorithms::pair<int, int>>(1);
+            dat[0] = amp_stl_algorithms::pair<int, int>(1, 2);
+ 
+            concurrency::parallel_for_each(dat.extent, [=](concurrency::index<1> idx) restrict(amp)
+            {
+                amp_stl_algorithms::swap(dat[idx].first, dat[idx].second);
+            });
+
+            Assert::AreEqual(2, dat[0].first);
+            Assert::AreEqual(1, dat[0].second);
+        }
+
+        TEST_METHOD(stl_pair_copy)
+        {
+            array_view<amp_stl_algorithms::pair<int, int>> dat(1);
+            dat[0] = amp_stl_algorithms::pair<int, int>(1, 2);
+
+            concurrency::parallel_for_each(dat.extent, [=](concurrency::index<1> idx) restrict(amp)
+            {
+                amp_stl_algorithms::pair<int, int> x(3, 4);
+                dat[idx] = x;
+            });
+
+            Assert::AreEqual(3, dat[0].first);
+            Assert::AreEqual(4, dat[0].second);
+        }
+
+        TEST_METHOD(stl_pair_conversion_from_std_pair)
+        {
+            std::pair<int, int> y(1, 2);
+
+            amp_stl_algorithms::pair<int, int> x = y;
+
+            Assert::AreEqual(1, x.first);
+            Assert::AreEqual(2, x.second);
+        }
+
+        TEST_METHOD(stl_pair_conversion_to_std_pair)
+        {
+            amp_stl_algorithms::pair<int, int> y(1, 2);
+
+            std::pair<int, int> x = y;
+
+            Assert::AreEqual(1, x.first);
+            Assert::AreEqual(2, x.second);
+        }
+    };
 
     TEST_CLASS(stl_algorithms_tests)
     {
@@ -733,6 +831,30 @@ namespace amp_stl_algorithms_tests
             {
                 Assert::AreEqual(int(i), av[i]);
             }
+        }
+
+        //----------------------------------------------------------------------------
+        // minmax, max_element, min_element, minmax_element
+        //----------------------------------------------------------------------------
+        // TODO: Should be able to make these tests a bit tidier with better casting support for pair<T, T>
+        TEST_METHOD(stl_minmax)
+        {
+            compare_operators([=](int a, int b)->std::pair<const int, const int> { return std::minmax(a, b); },
+                [=](int a, int b)->std::pair<const int, const int> 
+            { 
+                return amp_stl_algorithms::minmax(a, b); 
+            });
+        }
+
+        TEST_METHOD(stl_minmax_pred)
+        {
+            std::pair<const int&, const int&>(*minmax) (const int&, const int&) = std::minmax<int>;
+
+            compare_operators([=](int& a, int& b)->std::pair<const int, const int> { return std::minmax(a, b, std::greater_equal<int>()); },
+                [=](int& a, int& b)->std::pair<const int, const int>
+            { 
+                return amp_stl_algorithms::minmax(a, b, amp_algorithms::greater_equal<int>()); 
+            });
         }
 
         //----------------------------------------------------------------------------

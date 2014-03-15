@@ -110,10 +110,6 @@ namespace amp_algorithms_tests
 
         TEST_METHOD(amp_comparison_operators)
         {
-            // Clear up std::min & std::max overload ambiguity.
-            int const & (*min) (int const &, int const &) = std::min<int>;
-            int const & (*max) (int const &, int const &) = std::max<int>;
-
             compare_operators(std::equal_to<int>(), amp_algorithms::equal_to<int>());
             compare_operators(std::not_equal_to<int>(), amp_algorithms::not_equal_to<int>());
 
@@ -121,9 +117,22 @@ namespace amp_algorithms_tests
             compare_operators(std::less<int>(), amp_algorithms::less<int>());
             compare_operators(std::greater_equal<int>(), amp_algorithms::greater_equal<int>());
             compare_operators(std::less_equal<int>(), amp_algorithms::less_equal<int>());
+        }
+
+        TEST_METHOD(amp_max)
+        {
+            // Clear up std::min & std::max overload ambiguity.
+            int const & (*max) (int const &, int const &) = std::max<int>;
+
+            compare_operators(max, amp_algorithms::max<int>());
+        }
+
+        TEST_METHOD(amp_min)
+        {
+            // Clear up std::min & std::max overload ambiguity.
+            int const & (*min) (int const &, int const &) = std::min<int>;
 
             compare_operators(min, amp_algorithms::min<int>());
-            compare_operators(max, amp_algorithms::max<int>());
         }
 
         TEST_METHOD(amp_bitwise_operators)
@@ -143,44 +152,6 @@ namespace amp_algorithms_tests
             }
             compare_logical_operators(std::logical_and<unsigned>(), amp_algorithms::logical_and<unsigned>());
             compare_logical_operators(std::logical_or<unsigned>(), amp_algorithms::logical_or<unsigned>());
-        }
-
-        template<typename StlFunc, typename AmpFunc>
-        void compare_operators(StlFunc stl_func, AmpFunc amp_func)
-        {
-            typedef std::pair<int, int> test_pair;
-
-            std::array<test_pair, 5> tests = { 
-                test_pair(100, 100), 
-                test_pair(150, 300), 
-                test_pair(1000, -50), 
-                test_pair(11, 12), 
-                test_pair(-12, 33) 
-            };
-
-            for (auto& p : tests)
-            {
-                Assert::AreEqual(stl_func(p.first, p.second), amp_func(p.first, p.second));
-            }
-        }
-
-        template<typename StlFunc, typename AmpFunc>
-        void compare_logical_operators(StlFunc stl_func, AmpFunc amp_func)
-        {
-            typedef std::pair<unsigned int, unsigned int> test_pair;
-
-            std::array<test_pair, 8> tests = { 
-                test_pair(0xF, 0xF), 
-                test_pair(0xFF, 0x0A), 
-                test_pair(0x0A, 0xFF),
-                test_pair(0xFF, 0x00),
-                test_pair(0x00, 0x00)
-            };
-
-            for (auto& p : tests)
-            {
-                Assert::AreEqual(stl_func(p.first, p.second), amp_func(p.first, p.second));
-            }
         }
     };
 

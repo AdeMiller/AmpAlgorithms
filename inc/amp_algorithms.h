@@ -253,6 +253,12 @@ namespace amp_algorithms
         }
     };
 
+    // TODO: Where should these be declared? Technically they are STL algorithms but they are already used by the direct3d namespace
+    // TODO: Does it really make a lot of sense to declare two namespaces or should everything be flattened into amp_algorithms?
+#ifdef max
+#error amp_algorithms encountered a definition of the macro max.
+#endif
+
     template <typename T>
     class max
     {
@@ -263,6 +269,10 @@ namespace amp_algorithms
         }
     };
 
+#ifdef min
+#error amp_algorithms encountered a definition of the macro min.
+#endif
+
     template <typename T>
     class min
     {
@@ -272,18 +282,6 @@ namespace amp_algorithms
             return ((a < b) ? a : b);
         }
     };
-
-    template<typename T>
-    std::pair<const T&, const T&> minmax(const T& a, const T& b) restrict(cpu, amp)
-    {
-        return (b < a) ? std::make_pair(b, a) : std::make_pair(a, b);
-    }
-
-    template<typename T, typename Compare>
-    std::pair<const T&, const T&> minmax(const T& a, const T& b, Compare comp) restrict(cpu, amp)
-    {
-        return std::make_pair<T, T>(a, b);
-    }
 
     //----------------------------------------------------------------------------
     // Logical operations

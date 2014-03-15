@@ -74,7 +74,7 @@ namespace test_tools
     template <typename T>
     inline void generate_data(std::vector<T> &v)
     {
-        srand(2012);    // Set random number seed so tests are reproducable.
+        srand(2012);    // Set random number seed so tests are reproducible.
         std::generate(begin(v), end(v), [=]{
             T v = (T)rand();
             return ((int(v) % 4) == 0) ? -v : v;
@@ -84,7 +84,7 @@ namespace test_tools
     template <>
     inline void generate_data(std::vector<unsigned int> &v)
     {
-        srand(2012);    // Set random number seed so tests are reproducable.
+        srand(2012);    // Set random number seed so tests are reproducible.
         std::generate(begin(v), end(v), [=](){ return (unsigned int) rand(); });
     }
 
@@ -177,6 +177,45 @@ namespace test_tools
             return false;
         }
         return true;
+    }
+
+    template<typename StlFunc, typename AmpFunc>
+    void compare_operators(StlFunc stl_func, AmpFunc amp_func)
+    {
+        typedef std::pair<int, int> test_pair;
+        
+        std::array<test_pair, 6> tests = {
+            test_pair(1, 2),
+            test_pair(100, 100),
+            test_pair(150, 300),
+            test_pair(1000, -50),
+            test_pair(11, 12),
+            test_pair(-12, 33)
+        };
+        
+        for (auto p : tests)
+        {
+            Assert::AreEqual(stl_func(p.first, p.second), amp_func(p.first, p.second));
+        }
+    }
+
+    template<typename StlFunc, typename AmpFunc>
+    void compare_logical_operators(StlFunc stl_func, AmpFunc amp_func)
+    {
+        typedef std::pair<unsigned int, unsigned int> test_pair;
+
+        std::array<test_pair, 8> tests = {
+            test_pair(0xF, 0xF),
+            test_pair(0xFF, 0x0A),
+            test_pair(0x0A, 0xFF),
+            test_pair(0xFF, 0x00),
+            test_pair(0x00, 0x00)
+        };
+
+        for (auto& p : tests)
+        {
+            Assert::AreEqual(stl_func(p.first, p.second), amp_func(p.first, p.second));
+        }
     }
 
     // Compare array_view with other STL containers.
