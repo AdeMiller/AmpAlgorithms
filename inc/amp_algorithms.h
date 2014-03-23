@@ -856,7 +856,7 @@ namespace amp_algorithms
             tidx.barrier.wait_with_tile_static_memory_fence();
             return val;
         }
-    }
+    } // namespace _details
 
     template <int TileSize, scan_mode _Mode, typename _BinaryOp, typename T>
     inline void scan_new(const concurrency::array<T, 1>& input_array, concurrency::array<T, 1>& output_array, const _BinaryOp& op)

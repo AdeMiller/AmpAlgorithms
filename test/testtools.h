@@ -351,5 +351,5 @@ namespace test_tools
             static wchar_t delim(L',');
             return &delim;
         }
-    }
-}; // namespace testtools
+    } // namespace _details
+}; // namespace test_tools

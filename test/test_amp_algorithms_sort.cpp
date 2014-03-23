@@ -85,6 +85,7 @@ namespace amp_algorithms_tests
 }; // namespace amp_algorithms_tests
 
 // TODO: Finish make_array_view, assuming we really need it.
+
 template< typename ConstRandomAccessIterator >
 void make_array_view( ConstRandomAccessIterator first, ConstRandomAccessIterator last )
 {

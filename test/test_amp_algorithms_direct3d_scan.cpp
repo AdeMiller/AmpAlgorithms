@@ -47,6 +47,7 @@ namespace amp_algorithms_direct3d_details_tests
         }
     };
 };
+
 namespace amp_algorithms_direct3d_tests
 {
     enum class scan_type
