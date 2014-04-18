@@ -109,8 +109,8 @@ namespace amp_stl_algorithms_tests
         }
 
         TEST_METHOD(stl_pair_property_accessors)
-		{
-			amp_stl_algorithms::pair<int, int> dat(1, 2);
+        {
+            amp_stl_algorithms::pair<int, int> dat(1, 2);
             array_view<amp_stl_algorithms::pair<int, int>> dat_vw(1, &dat); 
  
             concurrency::parallel_for_each(dat_vw.extent, [=](concurrency::index<1> idx) restrict(amp)
@@ -124,7 +124,7 @@ namespace amp_stl_algorithms_tests
 
         TEST_METHOD(stl_pair_copy)
         {
-			amp_stl_algorithms::pair<int, int> dat(1, 2);
+            amp_stl_algorithms::pair<int, int> dat(1, 2);
             auto dat_vw = array_view<amp_stl_algorithms::pair<int, int>>(1, &dat);
 
             concurrency::parallel_for_each(dat_vw.extent, [=](concurrency::index<1> idx) restrict(amp)

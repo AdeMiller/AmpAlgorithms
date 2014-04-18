@@ -33,7 +33,6 @@ namespace amp_stl_algorithms
     // pair<T1, T2>
     //----------------------------------------------------------------------------
 
-    // TODO: pair<T, T> may need more casting/conversion operations etc.
     template<class T1, class T2>
     class pair
     {
@@ -44,7 +43,6 @@ namespace amp_stl_algorithms
         T1 first;
         T2 second;
 
-        // Default constructor
         pair() restrict(amp, cpu)
             : first(), second()
         { }
@@ -63,7 +61,8 @@ namespace amp_stl_algorithms
             : first(val1), second(val2)
         { }
 
-        // Converting constructor from std::pair
+        // Support interop with std::pair.
+
         pair(const std::pair<T1, T2>& val) restrict(amp, cpu)
             : first(val.first), second(val.second)
         { }
@@ -75,7 +74,6 @@ namespace amp_stl_algorithms
             return *this;
         }
 
-        // conversion to std::pair<T1, T2> (type-cast operator)
         operator std::pair<T1, T2>() restrict(cpu)
         {
             return std::pair<T1, T2>(first, second);
@@ -112,11 +110,101 @@ namespace amp_stl_algorithms
         return (!(_Right < _Left));
     }
 
-    template<class T1, class T2> inline
-        bool operator>=(const pair<T1, T2>& _Left, const pair<T1, T2>& _Right) restrict(amp, cpu)
+    template<class T1, class T2> 
+    inline bool operator>=(const pair<T1, T2>& _Left, const pair<T1, T2>& _Right) restrict(amp, cpu)
     {
             return (!(_Left < _Right));
     }
+
+    //----------------------------------------------------------------------------
+    //  tuple<... T>
+    //----------------------------------------------------------------------------
+
+    // http://mitchnull.blogspot.com/2012/06/c11-tuple-implementation-details-part-1.html
+    // TODO: NOT IMPLEMENTED Tuple<...T>
+    /*
+    template <typename... T>
+    class tuple;
+
+    namespace _details
+    {
+
+    }
+
+    template <typename... T>
+    class tuple {
+    public:
+        tuple();
+
+        explicit tuple(const T&...);
+
+        template <typename... U>
+        explicit tuple(U&&...);
+
+        tuple(const tuple&);
+
+        tuple(tuple&&);
+
+        template <typename... U>
+        tuple(const tuple<U...>&);
+
+        template <typename... U>
+        tuple(tuple<U...>&&);
+
+        tuple& operator=(const tuple&);
+      
+        tuple& operator=(tuple&&);
+
+        template <typename... U>
+        tuple& operator=(const tuple<U...>&);
+
+        template <typename... U>
+        tuple& operator=(tuple<U...>&&);
+
+        void swap(tuple&);
+    };
+
+    template <typename... T> typename tuple_size<tuple<T...>>;
+
+    template <size_t I, typename... T> typename tuple_element<I, tuple<T...>>;
+
+    // element access:
+
+    template <size_t I, typename... T>
+    typename tuple_element<I, tuple<T...>>::type&
+        get(tuple<T...>&);
+
+    template <size_t I, typename... T>
+    typename tuple_element<I, tuple<T...>>::type const&
+        get(const tuple<T...>&);
+
+    template <size_t I, typename... T>
+    typename tuple_element<I, tuple<T...>>::type&&
+        get(tuple<T...>&&);
+
+    // relational operators:
+
+    template<typename... T, typename... U>
+    bool operator==(const tuple<T...>&, const tuple<U...>&);
+
+    template<typename... T, typename... U>
+    bool operator<(const tuple<T...>&, const tuple<U...>&);
+
+    template<typename... T, typename... U>
+    bool operator!=(const tuple<T...>&, const tuple<U...>&);
+
+    template<typename... T, typename... U>
+    bool operator>(const tuple<T...>&, const tuple<U...>&);
+
+    template<typename... T, typename... U>
+    bool operator<=(const tuple<T...>&, const tuple<U...>&);
+
+    template<typename... T, typename... U>
+    bool operator>=(const tuple<T...>&, const tuple<U...>&);
+
+    template <typename... Types>
+    void swap(tuple<Types...>& x, tuple<Types...>& y);
+    */
 
     //----------------------------------------------------------------------------
     // adjacent_difference
