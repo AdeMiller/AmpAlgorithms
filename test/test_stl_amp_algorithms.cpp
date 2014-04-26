@@ -835,7 +835,8 @@ namespace amp_stl_algorithms_tests
         // TODO: Should be able to make these tests a bit tidier with better casting support for pair<T, T>
         TEST_METHOD_CATEGORY(stl_minmax, "stl")
         {
-            compare_operators([=](int a, int b)->std::pair<const int, const int> { return std::minmax(a, b); },
+            compare_operators(
+                [=](int a, int b)->std::pair<const int, const int> { return std::minmax(a, b); },
                 [=](int a, int b)->std::pair<const int, const int> 
             { 
                 return amp_stl_algorithms::minmax(a, b); 
@@ -844,9 +845,10 @@ namespace amp_stl_algorithms_tests
 
         TEST_METHOD_CATEGORY(stl_minmax_pred, "stl")
         {
-            std::pair<const int&, const int&>(*minmax) (const int&, const int&) = std::minmax<int>;
+            //std::pair<const int&, const int&>(*minmax) (const int&, const int&) = std::minmax<int>;
 
-            compare_operators([=](int& a, int& b)->std::pair<const int, const int> { return std::minmax(a, b, std::greater_equal<int>()); },
+            compare_operators(
+                [=](int& a, int& b)->std::pair<const int, const int> { return std::minmax(a, b, std::greater_equal<int>()); },
                 [=](int& a, int& b)->std::pair<const int, const int>
             { 
                 return amp_stl_algorithms::minmax(a, b, amp_algorithms::greater_equal<int>()); 

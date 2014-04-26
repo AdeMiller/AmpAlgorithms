@@ -413,11 +413,11 @@ namespace amp_algorithms
     // http://www.cs.virginia.edu/~dgm4d/papers/RadixSortTR.pdf
     // http://xxx.lanl.gov/pdf/1008.2849
     // http://www.rebe.rau.ro/RePEc/rau/jisomg/WI12/JISOM-WI12-A11.pdf
-
+    //
     // "Designing Efficient Sorting Algorithms for Manycore GPUs" http://www.nvidia.com/docs/io/67073/nvr-2008-001.pdf
-
+    //
     // "Histogram Calculation in CUDA" http://docs.nvidia.com/cuda/samples/3_Imaging/histogram/doc/histogram.pdf
-
+    //
     // TODO: Move this to the impl file?
     namespace _details
     {
