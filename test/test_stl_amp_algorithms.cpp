@@ -27,7 +27,7 @@
 #ifdef CODECOVERAGE
 #pragma managed(push, off)
 ExcludeFromCodeCoverage(exclude_amp_stl_algorithms_tests, L"amp_stl_algorithms_tests::*");
-ExcludeFromCodeCoverage(exclude_test_tools, L"test_tools::*")
+ExcludeFromCodeCoverage(exclude_testtools, L"testtools::*")
 ExcludeFromCodeCoverage(exclude_wrl, L"Microsoft::WRL::*")
 #pragma managed(pop)
 #endif
@@ -35,7 +35,7 @@ ExcludeFromCodeCoverage(exclude_wrl, L"Microsoft::WRL::*")
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
 using namespace amp_stl_algorithms;
-using namespace test_tools;
+using namespace testtools;
 
 namespace Microsoft {
     namespace VisualStudio {
@@ -130,6 +130,7 @@ namespace amp_stl_algorithms_tests
             concurrency::parallel_for_each(dat_vw.extent, [=](concurrency::index<1> idx) restrict(amp)
             {
                 amp_stl_algorithms::pair<int, int> x(3, 4);
+                dat_vw[0] = x;
             });
 
             Assert::AreEqual(3, dat_vw[0].first);

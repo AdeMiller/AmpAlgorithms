@@ -27,7 +27,7 @@
 #ifdef CODECOVERAGE
 #pragma managed(push, off)
 ExcludeFromCodeCoverage(exclude_amp_algorithms_tests, L"amp_algorithms_tests::*");
-ExcludeFromCodeCoverage(exclude_test_tools, L"test_tools::*")
+ExcludeFromCodeCoverage(exclude_testtools, L"testtools::*")
 ExcludeFromCodeCoverage(exclude_wrl, L"Microsoft::WRL::*")
 #pragma managed(pop)
 #endif
