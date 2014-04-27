@@ -27,7 +27,7 @@ using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
 using namespace amp_algorithms;
 using namespace amp_algorithms::_details;
-using namespace test_tools;
+using namespace testtools;
 
 namespace amp_algorithms_tests
 {

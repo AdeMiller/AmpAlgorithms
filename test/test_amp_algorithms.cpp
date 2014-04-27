@@ -35,7 +35,7 @@ ExcludeFromCodeCoverage(exclude_wrl, L"Microsoft::WRL::*")
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
 using namespace amp_algorithms;
-using namespace test_tools;
+using namespace testtools;
 
 // TODO: Add tests for indexable_view_traits
 

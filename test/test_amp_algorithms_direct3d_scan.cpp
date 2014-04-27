@@ -26,7 +26,7 @@
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
 using namespace amp_algorithms::direct3d;
-using namespace test_tools;
+using namespace testtools;
 
 namespace amp_algorithms_direct3d_details_tests
 {

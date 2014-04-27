@@ -61,7 +61,7 @@ class array { };
     END_TEST_METHOD_ATTRIBUTE() \
     TEST_METHOD(methodName)
 
-namespace test_tools
+namespace testtools
 {
     inline void set_default_accelerator()
     {

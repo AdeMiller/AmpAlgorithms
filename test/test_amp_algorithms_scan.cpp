@@ -25,7 +25,7 @@
 
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace amp_algorithms;
-using namespace test_tools;
+using namespace testtools;
 
 namespace amp_algorithms_tests
 {

@@ -33,7 +33,7 @@ ExcludeFromCodeCoverage(exclude_test_tool_tests, L"testtools_tests::*");
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 using namespace concurrency;
 using namespace amp_stl_algorithms;
-using namespace test_tools;
+using namespace testtools;
 
 namespace testtools_tests
 {
