@@ -81,7 +81,7 @@ namespace Microsoft {
 namespace amp_stl_algorithms_tests
 {
     // This isn't a test, it's just a convenient way to determine which accelerator tests ran on.
-    TEST_CLASS(configuration_tests)
+    TEST_CLASS(testtools_configuration_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -100,7 +100,7 @@ namespace amp_stl_algorithms_tests
     
     // TODO: Get the tests, header and internal implementations into the same logical order.
 
-    TEST_CLASS(stl_algorithms_pair_tests)
+    TEST_CLASS(stl_pair_tests)
     {
         // TODO: Add more tests for pair<T, T>, casting etc.
         TEST_CLASS_INITIALIZE(initialize_tests)

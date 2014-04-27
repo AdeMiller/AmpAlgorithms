@@ -36,7 +36,7 @@ namespace amp_algorithms_tests
         return msg.str();
     }
 
-    TEST_CLASS(scan_tests)
+    TEST_CLASS(amp_scan_tests)
     {
     private:
 

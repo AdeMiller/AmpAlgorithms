@@ -42,7 +42,7 @@ using namespace test_tools;
 namespace amp_algorithms_tests
 {
     // This isn't a test, it's just a convenient way to determine which accelerator tests ran on.
-    TEST_CLASS(configuration_tests)
+    TEST_CLASS(testtools_configuration_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -59,7 +59,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(padded_read_write_tests)
+    TEST_CLASS(amp_padded_read_write_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -87,7 +87,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(operator_tests)
+    TEST_CLASS(amp_operator_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -155,7 +155,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(reduce_tests)
+    TEST_CLASS(amp_reduce_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -214,7 +214,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(functor_view_tests)
+    TEST_CLASS(amp_functor_view_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -278,7 +278,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(generate_tests)
+    TEST_CLASS(amp_generate_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -303,7 +303,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(transform_tests)
+    TEST_CLASS(amp_transform_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
@@ -368,7 +368,7 @@ namespace amp_algorithms_tests
         }
     };
 
-    TEST_CLASS(fill_tests)
+    TEST_CLASS(amp_fill_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {

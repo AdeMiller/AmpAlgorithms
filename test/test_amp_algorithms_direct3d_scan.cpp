@@ -31,7 +31,7 @@ using namespace test_tools;
 namespace amp_algorithms_direct3d_details_tests
 {
     // This tests an inlined function so don't exclude this from coverage.
-    TEST_CLASS(details_tests)
+    TEST_CLASS(amp_direct3d_details_tests)
     {
         TEST_METHOD_CATEGORY(amp_details_check_hresult, "amp::direct3d")
         {
@@ -59,7 +59,7 @@ namespace amp_algorithms_direct3d_tests
 
     struct bitvector;
 
-    TEST_CLASS(scan_dx_tests)
+    TEST_CLASS(amp_direct3d_scan_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {

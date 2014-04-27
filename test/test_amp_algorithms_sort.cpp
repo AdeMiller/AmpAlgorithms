@@ -31,7 +31,7 @@ using namespace test_tools;
 
 namespace amp_algorithms_tests
 {
-    TEST_CLASS(sort_tests)
+    TEST_CLASS(amp_sort_tests)
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {

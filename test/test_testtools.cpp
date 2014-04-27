@@ -37,7 +37,7 @@ using namespace test_tools;
 
 namespace testtools_tests
 {
-    TEST_CLASS(testtools_equality)
+    TEST_CLASS(testtools_equality_tests)
     {
         TEST_METHOD_CATEGORY(testtools_array_view_equality, "testtools")
         {
@@ -73,7 +73,7 @@ namespace testtools_tests
         return msg.str();
     }
 
-    TEST_CLASS(testtools_sequential_scan)
+    TEST_CLASS(testtools_sequential_scan_tests)
     {
         TEST_METHOD_CATEGORY(testtools_sequential_exclusive_scan, "testtools")
         {
@@ -100,7 +100,7 @@ namespace testtools_tests
         }
     };
 
-    TEST_CLASS(testtools_ostream)
+    TEST_CLASS(testtools_ostream_tests)
     {
         TEST_METHOD_CATEGORY(testtools_ostream_insertion_std_vector, "testtools")
         {
