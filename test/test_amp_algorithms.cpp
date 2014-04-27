@@ -49,7 +49,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_accelerator_configuration)
+        TEST_METHOD_CATEGORY(amp_accelerator_configuration, "amp")
         {
             Logger::WriteMessage("Running amp_algorithms_tests on:");
             Logger::WriteMessage(accelerator().description.c_str());
@@ -66,7 +66,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_padded_read)
+        TEST_METHOD_CATEGORY(amp_padded_read, "amp")
         {
             std::array<int, 10> vec = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             array_view<int> av(10, vec);
@@ -75,7 +75,7 @@ namespace amp_algorithms_tests
             Assert::AreEqual(int(), padded_read(av, concurrency::index<1>(20)));
         }
 
-        TEST_METHOD(amp_padded_write)
+        TEST_METHOD_CATEGORY(amp_padded_write, "amp")
         {
             std::array<int, 10> vec = { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
             array_view<int> av(5, vec);
@@ -94,7 +94,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_arithmetic_operators)
+        TEST_METHOD_CATEGORY(amp_arithmetic_operators, "amp")
         {
             compare_operators(std::plus<int>(), amp_algorithms::plus<int>());
             compare_operators(std::minus<int>(), amp_algorithms::minus<int>());
@@ -108,7 +108,7 @@ namespace amp_algorithms_tests
             Assert::AreEqual(0, amp_algorithms::negates<int>()(0));
         }
 
-        TEST_METHOD(amp_comparison_operators)
+        TEST_METHOD_CATEGORY(amp_comparison_operators, "amp")
         {
             compare_operators(std::equal_to<int>(), amp_algorithms::equal_to<int>());
             compare_operators(std::not_equal_to<int>(), amp_algorithms::not_equal_to<int>());
@@ -119,7 +119,7 @@ namespace amp_algorithms_tests
             compare_operators(std::less_equal<int>(), amp_algorithms::less_equal<int>());
         }
 
-        TEST_METHOD(amp_max)
+        TEST_METHOD_CATEGORY(amp_max, "amp")
         {
             // Clear up std::min & std::max overload ambiguity.
             int const & (*max) (int const &, int const &) = std::max<int>;
@@ -127,7 +127,7 @@ namespace amp_algorithms_tests
             compare_operators(max, amp_algorithms::max<int>());
         }
 
-        TEST_METHOD(amp_min)
+        TEST_METHOD_CATEGORY(amp_min, "amp")
         {
             // Clear up std::min & std::max overload ambiguity.
             int const & (*min) (int const &, int const &) = std::min<int>;
@@ -135,14 +135,14 @@ namespace amp_algorithms_tests
             compare_operators(min, amp_algorithms::min<int>());
         }
 
-        TEST_METHOD(amp_bitwise_operators)
+        TEST_METHOD_CATEGORY(amp_bitwise_operators, "amp")
         {
             compare_operators(std::bit_and<int>(), amp_algorithms::bit_and<int>());
             compare_operators(std::bit_or<int>(), amp_algorithms::bit_or<int>());
             compare_operators(std::bit_xor<int>(), amp_algorithms::bit_xor<int>());
         }
 
-        TEST_METHOD(amp_logical_operators)
+        TEST_METHOD_CATEGORY(amp_logical_operators, "amp")
         {
             std::array<unsigned, 4> tests = { 0xF0, 0xFF, 0x0A, 0x00 };
 
@@ -163,7 +163,7 @@ namespace amp_algorithms_tests
         }
 
         /*
-        TEST_METHOD(amp_reduce_double_sum)
+        TEST_METHOD_CATEGORY(amp_reduce_double_sum)
         {
             if (!accelerator().get_supports_double_precision())
             {
@@ -178,20 +178,20 @@ namespace amp_algorithms_tests
         }
         */
 
-        TEST_METHOD(amp_reduce_int_min)
+        TEST_METHOD_CATEGORY(amp_reduce_int_min, "amp")
         {
             int cpu_result, amp_result;
 
-            test_reduce<int>(1023 * 1029 * 13, amp_algorithms::min<int>(), cpu_result, amp_result);
+            test_reduce<int>(test_array_size<int>(), amp_algorithms::min<int>(), cpu_result, amp_result);
 
             Assert::AreEqual(cpu_result, amp_result);
         }
 
-        TEST_METHOD(amp_reduce_float_max)
+        TEST_METHOD_CATEGORY(amp_reduce_float_max, "amp")
         {
             float cpu_result, amp_result;
 
-            test_reduce<float>(1023 * 1029 * 5, amp_algorithms::max<float>(), cpu_result, amp_result);
+            test_reduce<float>(test_array_size<float>(), amp_algorithms::max<float>(), cpu_result, amp_result);
 
             Assert::AreEqual(cpu_result, amp_result);
         }
@@ -221,16 +221,16 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_functor_view_float)
+        TEST_METHOD_CATEGORY(amp_functor_view_float, "amp")
         {
             float cpuStdDev, gpuStdDev;
 
-            test_functor_view<float>(1023 * 31, cpuStdDev, gpuStdDev);
+            test_functor_view<float>(test_array_size<float>(), cpuStdDev, gpuStdDev);
 
             Assert::IsTrue(compare(gpuStdDev, cpuStdDev));
         }
 
-        TEST_METHOD(amp_functor_view_int)
+        TEST_METHOD_CATEGORY(amp_functor_view_int, "amp")
         {
             int cpuStdDev, gpuStdDev;
 
@@ -285,7 +285,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_generate_int)
+        TEST_METHOD_CATEGORY(amp_generate_int, "amp")
         {
             std::vector<int> vec(1024);
             array_view<int,1> av(1024, vec);
@@ -310,7 +310,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_transform_unary)
+        TEST_METHOD_CATEGORY(amp_transform_unary, "amp")
         {
             const int height = 16;
             const int width = 16;
@@ -336,7 +336,7 @@ namespace amp_algorithms_tests
             }
         }
 
-        TEST_METHOD(amp_transform_binary)
+        TEST_METHOD_CATEGORY(amp_transform_binary, "amp")
         {
             const int depth = 16;
             const int height = 16;
@@ -375,7 +375,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_fill_int)
+        TEST_METHOD_CATEGORY(amp_fill_int, "amp")
         {
             std::vector<int> vec(1024);
             array_view<int> av(1024, vec);

@@ -23,6 +23,8 @@
 #include <amp_algorithms.h>
 #include <amp_stl_algorithms.h>
 
+#include "testtools.h"
+
 using namespace Microsoft::VisualStudio::CppUnitTestFramework;
 
 using namespace concurrency;
@@ -48,7 +50,7 @@ namespace examples
         TEST_METHOD(stl_example_hello_world)
         {
             {
-                array<float> data(1024 * 1024);
+                concurrency::array<float> data(1024 * 1024);
                 array_view<float> data_av(data);
 
                 amp_stl_algorithms::iota(begin(data_av), end(data_av), 1.0f);

@@ -53,23 +53,47 @@ class array { };
 //  Set USE_REF to use the REF accelerator for all tests. This is useful if tests fail on a particular machine as
 //  failure may be due to a driver bug.
 
+#define TEST_CATEGORY(category) TEST_METHOD_ATTRIBUTE(L"TestCategory", L#category)
+
+#define TEST_METHOD_CATEGORY(methodName, category) \
+    BEGIN_TEST_METHOD_ATTRIBUTE(methodName) \
+    TEST_CATEGORY(category) \
+    END_TEST_METHOD_ATTRIBUTE() \
+    TEST_METHOD(methodName)
+
 namespace test_tools
 {
     inline void set_default_accelerator()
     {
-    #if defined(USE_REF)
+#if defined(USE_REF)
         bool set_ok = accelerator::set_default(accelerator::direct3d_ref);
 
         if (!set_ok)
         {
             Logger::WriteMessage("Unable to set default accelerator to REF.");
         }
-    #endif
+#endif
     }
 
     //===============================================================================
     //  Helper functions to generate test data of random numbers.
     //===============================================================================
+
+    template<typename T>
+    inline int test_array_size()
+    {
+        int size;
+#if _DEBUG
+        size = 1023;
+#else
+        size = 1023 + 1029;
+#endif
+        if (std::is_same<T, int>::value)
+            size *= 13;
+        else if (std::is_same<T, float>::value)
+            size *= 5;
+        return size;
+    }
 
     template <typename T>
     inline void generate_data(std::vector<T> &v)

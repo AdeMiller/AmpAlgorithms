@@ -33,7 +33,7 @@ namespace amp_algorithms_direct3d_details_tests
     // This tests an inlined function so don't exclude this from coverage.
     TEST_CLASS(details_tests)
     {
-        TEST_METHOD(amp_details_check_hresult)
+        TEST_METHOD_CATEGORY(amp_details_check_hresult, "amp::direct3d")
         {
             try
             {
@@ -66,7 +66,7 @@ namespace amp_algorithms_direct3d_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(amp_dx_scan_backwards)
+        TEST_METHOD_CATEGORY(amp_dx_scan_backwards, "amp::direct3d")
         {
             const bool backwards = true;
 
@@ -76,7 +76,7 @@ namespace amp_algorithms_direct3d_tests
             test_scan_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_scan_forwards)
+        TEST_METHOD_CATEGORY(amp_dx_scan_forwards, "amp::direct3d")
         {
             const bool backwards = false;
 
@@ -86,7 +86,7 @@ namespace amp_algorithms_direct3d_tests
             test_scan_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_multiscan_backwards)
+        TEST_METHOD_CATEGORY(amp_dx_multiscan_backwards, "amp::direct3d")
         {
             const bool backwards = true;
 
@@ -96,7 +96,7 @@ namespace amp_algorithms_direct3d_tests
             test_multiscan_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_multiscan_forwards)
+        TEST_METHOD_CATEGORY(amp_dx_multiscan_forwards, "amp::direct3d")
         {
             const bool backwards = false;
 
@@ -106,7 +106,7 @@ namespace amp_algorithms_direct3d_tests
             test_multiscan_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_segmented_scan_backwards)
+        TEST_METHOD_CATEGORY(amp_dx_segmented_scan_backwards, "amp::direct3d")
         {
             const bool backwards = true;
 
@@ -116,7 +116,7 @@ namespace amp_algorithms_direct3d_tests
             test_segmented_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_segmented_scan_forwards)
+        TEST_METHOD_CATEGORY(amp_dx_segmented_scan_forwards, "amp::direct3d")
         {
             const bool backwards = false;
 
@@ -126,7 +126,7 @@ namespace amp_algorithms_direct3d_tests
             test_segmented_bitwise_op<int>(backwards);
         }
 
-        TEST_METHOD(amp_dx_scan_other)
+        TEST_METHOD_CATEGORY(amp_dx_scan_other, "amp::direct3d")
         {
             const int elem_count = 10;
             std::vector<unsigned int> in(elem_count, 1);
@@ -156,7 +156,7 @@ namespace amp_algorithms_direct3d_tests
             }
         }
 
-        TEST_METHOD(amp_dx_scan_error_handling)
+        TEST_METHOD_CATEGORY(amp_dx_scan_error_handling, "amp::direct3d")
         {
             accelerator ref(accelerator::direct3d_ref);
             accelerator_view ref_view = ref.create_view();
@@ -310,7 +310,7 @@ namespace amp_algorithms_direct3d_tests
         template<typename T>
         void test_segmented(bool backwards)
         {
-            test_scan_internal<T>(7123127, amp_algorithms::plus<T>(), "Test segmented scan", backwards, /*inplace=*/false, scan_type::segmented);
+            //test_scan_internal<T>(7123127, amp_algorithms::plus<T>(), "Test segmented scan", backwards, /*inplace=*/false, scan_type::segmented);
             test_scan_internal<T>(31, amp_algorithms::multiplies<T>(), "Test segmented scan", backwards, /*inplace=*/true, scan_type::segmented);
             test_scan_internal<T>(222, amp_algorithms::min<T>(), "Test segmented scan", backwards, /*inplace=*/false, scan_type::segmented);
             test_scan_internal<T>(333, amp_algorithms::max<T>(), "Test segmented scan", backwards, /*inplace=*/true, scan_type::segmented);

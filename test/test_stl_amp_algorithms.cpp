@@ -88,7 +88,7 @@ namespace amp_stl_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(stl_accelerator_configuration)
+        TEST_METHOD_CATEGORY(stl_accelerator_configuration, "stl")
         {
             Logger::WriteMessage("Running stl_algorithms_tests on:");
             Logger::WriteMessage(accelerator().description.c_str());
@@ -108,7 +108,7 @@ namespace amp_stl_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(stl_pair_property_accessors)
+        TEST_METHOD_CATEGORY(stl_pair_property_accessors, "stl")
         {
             amp_stl_algorithms::pair<int, int> dat(1, 2);
             array_view<amp_stl_algorithms::pair<int, int>> dat_vw(1, &dat); 
@@ -122,7 +122,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(1, dat_vw[0].second);
         }
 
-        TEST_METHOD(stl_pair_copy)
+        TEST_METHOD_CATEGORY(stl_pair_copy, "stl")
         {
             amp_stl_algorithms::pair<int, int> dat(1, 2);
             auto dat_vw = array_view<amp_stl_algorithms::pair<int, int>>(1, &dat);
@@ -136,7 +136,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(4, dat_vw[0].second);
         }
 
-        TEST_METHOD(stl_pair_conversion_from_std_pair)
+        TEST_METHOD_CATEGORY(stl_pair_conversion_from_std_pair, "stl")
         {
             std::pair<int, int> y(1, 2);
 
@@ -146,7 +146,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(2, x.second);
         }
 
-        TEST_METHOD(stl_pair_conversion_to_std_pair)
+        TEST_METHOD_CATEGORY(stl_pair_conversion_to_std_pair, "stl")
         {
             amp_stl_algorithms::pair<int, int> y(1, 2);
 
@@ -168,7 +168,7 @@ namespace amp_stl_algorithms_tests
         // adjacent_difference
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_adjacent_difference)
+        TEST_METHOD_CATEGORY(stl_adjacent_difference, "stl")
         {
             const int size = 10;
             std::vector<int> vec(size);
@@ -234,7 +234,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(expected[0], result_av[0]);
         }
 
-        TEST_METHOD(stl_adjacent_difference_multi_tile)
+        TEST_METHOD_CATEGORY(stl_adjacent_difference_multi_tile, "stl")
         {
             const int size = 1024;
             std::vector<int> vec(size);
@@ -257,7 +257,7 @@ namespace amp_stl_algorithms_tests
         // all_of, any_of, none_of
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_none_of)
+        TEST_METHOD_CATEGORY(stl_none_of, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -269,7 +269,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsFalse(r2);
         }
 
-        TEST_METHOD(stl_any_of)
+        TEST_METHOD_CATEGORY(stl_any_of, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -281,7 +281,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(r2);
         }
 
-        TEST_METHOD(stl_all_of)
+        TEST_METHOD_CATEGORY(stl_all_of, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -297,7 +297,7 @@ namespace amp_stl_algorithms_tests
         // copy, copy_if, copy_n, copy_backward
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_copy)
+        TEST_METHOD_CATEGORY(stl_copy, "stl")
         {
             test_copy(1024);
         }
@@ -317,7 +317,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(result_av[size - 1], *--result_end);
         }
 
-        TEST_METHOD(stl_copy_if)
+        TEST_METHOD_CATEGORY(stl_copy_if, "stl")
         {
             // These tests copy all the non-zero elements from the numbers array.
 
@@ -339,11 +339,7 @@ namespace amp_stl_algorithms_tests
             const std::array<int, 5> numbers3 = { 0, 0, 0, 0, 0 };
             test_copy_if(begin(numbers3), end(numbers3));
 
-#ifdef _DEBUG
-            std::vector<int> numbers4(1023);
-#else
-            std::vector<int> numbers4(1023 * 1029 * 13);
-#endif
+            std::vector<int> numbers4(test_array_size<int>());
             generate_data(numbers4);
             test_copy_if(begin(numbers4), end(numbers4));
         }
@@ -382,7 +378,7 @@ namespace amp_stl_algorithms_tests
             }
         }
 
-        TEST_METHOD(stl_copy_n)
+        TEST_METHOD_CATEGORY(stl_copy_n, "stl")
         {
             const int size = 1023;
             std::vector<int> vec(size);
@@ -403,7 +399,7 @@ namespace amp_stl_algorithms_tests
         // count, count_if
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_count)
+        TEST_METHOD_CATEGORY(stl_count, "stl")
         {
             static const int numbers[] = {1, 3, 6, 3, 2, 2, 7, 8, 2, 9, 2, 19, 2};
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -414,7 +410,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(0, r2);
         }
 
-        TEST_METHOD(stl_count_if)
+        TEST_METHOD_CATEGORY(stl_count_if, "stl")
         {
             static const int numbers[] = {1, 3, 6, 3, 2, 2, 7, 8, 2, 9, 2, 19, 2};
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -429,7 +425,7 @@ namespace amp_stl_algorithms_tests
         // equal
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_equal)
+        TEST_METHOD_CATEGORY(stl_equal, "stl")
         {
             std::vector<int> vec1(1024);
             std::iota(begin(vec1), end(vec1), 1);
@@ -449,7 +445,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(amp_stl_algorithms::equal(begin(av1), end(av1), begin(av2)));
         }
 
-        TEST_METHOD(stl_equal_pred)
+        TEST_METHOD_CATEGORY(stl_equal_pred, "stl")
         {
             std::vector<int> vec1(1024);
             std::iota(begin(vec1), end(vec1), 1);
@@ -469,7 +465,7 @@ namespace amp_stl_algorithms_tests
 
         // TODO: These iterator tests are in the wrong place, move them.
 
-        TEST_METHOD(stl_begin_end_array_view)
+        TEST_METHOD_CATEGORY(stl_begin_end_array_view, "stl")
         {
             std::vector<int> v1(6);
             array_view<int> a1(6, v1);
@@ -485,13 +481,13 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(res);
         }
 
-        TEST_METHOD(stl_random_access_iterator_default_ctor)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_default_ctor, "stl")
         {
             array_view_iterator<int> iter1; 
             auto iter2 = array_view_iterator<double>();
         }
 
-        TEST_METHOD(stl_random_access_iterator_copy_assignment_comparison)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_copy_assignment_comparison, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -509,7 +505,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsFalse(begin(a1) == iter1);
         }
 
-        TEST_METHOD(stl_random_access_iterator_dereference)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_dereference, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -525,7 +521,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(5, a1[1 + 2]);
         }
 
-        TEST_METHOD(stl_random_access_iterator_increment_decrement)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_increment_decrement, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -547,7 +543,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(iter1 == iter2);
         }
 
-        TEST_METHOD(stl_random_access_iterator_equality)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_equality, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -560,7 +556,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(iter2 >= iter1);
         }
 
-        TEST_METHOD(stl_random_access_iterator_increment)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_increment, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -574,7 +570,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(7, a1[1]);
         }
 
-        TEST_METHOD(stl_random_access_iterator_in_amp)
+        TEST_METHOD_CATEGORY(stl_random_access_iterator_in_amp, "stl")
         {
             std::vector<int> v1(16);
             array_view<int> a1(16, v1);
@@ -657,7 +653,7 @@ namespace amp_stl_algorithms_tests
         // fill, fill_n
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_fill)
+        TEST_METHOD_CATEGORY(stl_fill, "stl")
         {
             std::vector<int> vec(1024);
 
@@ -674,7 +670,7 @@ namespace amp_stl_algorithms_tests
             }
         }
 
-        TEST_METHOD(stl_fill_n)
+        TEST_METHOD_CATEGORY(stl_fill_n, "stl")
         {
             std::vector<int> vec(1024);
             array_view<int> av(1024, vec);
@@ -693,7 +689,7 @@ namespace amp_stl_algorithms_tests
         // find, find_if, find_if_not, find_end, find_first_of, adjacent_find
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_find)
+        TEST_METHOD_CATEGORY(stl_find, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -707,7 +703,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(end(av) == iter);
         }
 
-        TEST_METHOD(stl_find_if)
+        TEST_METHOD_CATEGORY(stl_find_if, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -721,7 +717,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(end(av) == iter);
         }
 
-        TEST_METHOD(stl_find_if_not)
+        TEST_METHOD_CATEGORY(stl_find_if_not, "stl")
         {
             static const int numbers[] = { 1, 3, 6, 3, 2, 2 };
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -735,7 +731,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(end(av) == iter);
         }
 
-        TEST_METHOD(stl_adjacent_find)
+        TEST_METHOD_CATEGORY(stl_adjacent_find, "stl")
         {
             const int size = 10;
             std::vector<int> vec(size);
@@ -760,7 +756,7 @@ namespace amp_stl_algorithms_tests
         // for_each, for_each_no_return
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_for_each_no_return)
+        TEST_METHOD_CATEGORY(stl_for_each_no_return, "stl")
         {
             std::vector<int> vec(1024);
             std::fill(vec.begin(), vec.end(), 2);
@@ -778,7 +774,7 @@ namespace amp_stl_algorithms_tests
         // generate, generate_n
         //----------------------------------------------------------------------------
         
-        TEST_METHOD(stl_generate)
+        TEST_METHOD_CATEGORY(stl_generate, "stl")
         {
             std::vector<int> vec(1024);
 
@@ -797,7 +793,7 @@ namespace amp_stl_algorithms_tests
             }
         }
 
-        TEST_METHOD(stl_generate_n)
+        TEST_METHOD_CATEGORY(stl_generate_n, "stl")
         {
             std::vector<int> vec(1024);
             array_view<int> av(1024, vec);
@@ -818,7 +814,7 @@ namespace amp_stl_algorithms_tests
         // iota
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_iota)
+        TEST_METHOD_CATEGORY(stl_iota, "stl")
         {
             const int size = 1024;
             std::vector<int> vec(size);
@@ -837,7 +833,7 @@ namespace amp_stl_algorithms_tests
         // minmax, max_element, min_element, minmax_element
         //----------------------------------------------------------------------------
         // TODO: Should be able to make these tests a bit tidier with better casting support for pair<T, T>
-        TEST_METHOD(stl_minmax)
+        TEST_METHOD_CATEGORY(stl_minmax, "stl")
         {
             compare_operators([=](int a, int b)->std::pair<const int, const int> { return std::minmax(a, b); },
                 [=](int a, int b)->std::pair<const int, const int> 
@@ -846,7 +842,7 @@ namespace amp_stl_algorithms_tests
             });
         }
 
-        TEST_METHOD(stl_minmax_pred)
+        TEST_METHOD_CATEGORY(stl_minmax_pred, "stl")
         {
             std::pair<const int&, const int&>(*minmax) (const int&, const int&) = std::minmax<int>;
 
@@ -861,7 +857,7 @@ namespace amp_stl_algorithms_tests
         // reduce
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_reduce_sum)
+        TEST_METHOD_CATEGORY(stl_reduce_sum, "stl")
         {
             static const int numbers[] = {1, 3, 6, 3, 2, 2, 7, 8, 2, 9, 2, 19, 2};
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -870,7 +866,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(66, result);
         }
 
-        TEST_METHOD(stl_reduce_max)
+        TEST_METHOD_CATEGORY(stl_reduce_max, "stl")
         {
             static const int numbers[] = {1, 3, 6, 3, 2, 2, 7, 8, 2, 9, 2, 19, 2};
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
@@ -885,7 +881,7 @@ namespace amp_stl_algorithms_tests
         // remove, remove_if, remove_copy, remove_copy_if
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_remove)
+        TEST_METHOD_CATEGORY(stl_remove, "stl")
         {
             const int size = 10;
             std::array<int, (size - 1)> expected = { 0, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -901,7 +897,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(9, *--expected_end);
         }
 
-        TEST_METHOD(stl_remove_if)
+        TEST_METHOD_CATEGORY(stl_remove_if, "stl")
         {
             // These tests remove all the non-zero elements from the numbers array.
 
@@ -920,12 +916,7 @@ namespace amp_stl_algorithms_tests
             //  Final result:                  -1, 1, 2, 3, 4, 5, 6, 7
             test_remove_if(begin(numbers3), end(numbers3));
             
-#ifdef _DEBUG
-            std::vector<int> numbers4(1023);
-#else
-            std::vector<int> numbers4(1023 * 1029 * 13);
-#endif
-            generate_data(numbers4);
+            std::vector<int> numbers4(test_array_size<int>());
             test_remove_if(begin(numbers4), end(numbers4));
         }
 
@@ -964,7 +955,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av.section(0, actual_size))); 
         }
 
-        TEST_METHOD(stl_remove_if_nop)
+        TEST_METHOD_CATEGORY(stl_remove_if_nop, "stl")
         {
             const int size = 10;
             std::array<int, 10> expected = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -976,7 +967,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av));
         }
 
-        TEST_METHOD(stl_remove_copy)
+        TEST_METHOD_CATEGORY(stl_remove_copy, "stl")
         {
             const int size = 10;
             std::array<int, 9> expected = { 0, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -992,7 +983,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, result_av.section(0, int(expected.size()))));
         }
 
-        TEST_METHOD(stl_remove_copy_if)
+        TEST_METHOD_CATEGORY(stl_remove_copy_if, "stl")
         {
             const int size = 10;
             std::array<int, (6)> expected = { 0, 1, 2, 3, 4, 5 };
@@ -1012,7 +1003,7 @@ namespace amp_stl_algorithms_tests
         // replace, replace_if, replace_copy, replace_copy_if
         //----------------------------------------------------------------------------
         
-        TEST_METHOD(stl_replace)
+        TEST_METHOD_CATEGORY(stl_replace, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { 0, -1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -1025,7 +1016,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av));
         }
 
-        TEST_METHOD(stl_replace_if)
+        TEST_METHOD_CATEGORY(stl_replace_if, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { 0, -1, 2, -1, 4, -1, 6, -1, 8, -1 };
@@ -1038,7 +1029,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av));
         }
 
-        TEST_METHOD(stl_replace_if_nop)
+        TEST_METHOD_CATEGORY(stl_replace_if_nop, "stl")
         {
             const int size = 10;
             std::array<int, 10> expected = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -1050,7 +1041,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av));
         }
 
-        TEST_METHOD(stl_replace_copy)
+        TEST_METHOD_CATEGORY(stl_replace_copy, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { 0, -1, 2, 3, 4, 5, 6, 7, 8, 9 };
@@ -1067,7 +1058,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(2, std::distance(begin(result_av), result_end));
         }
 
-        TEST_METHOD(stl_replace_copy_if_odd_numbers)
+        TEST_METHOD_CATEGORY(stl_replace_copy_if_odd_numbers, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { 0, -1, 2, -1, 4, -1, 6, -1, 8, -1 };
@@ -1084,7 +1075,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(10, std::distance(begin(result_av), result_end));
         }
 
-        TEST_METHOD(stl_replace_copy_if_lower_half)
+        TEST_METHOD_CATEGORY(stl_replace_copy_if_lower_half, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { -1, -1, -1, -1, -1, 5, 6, 7, 8, 9 };
@@ -1105,7 +1096,7 @@ namespace amp_stl_algorithms_tests
         // reverse, reverse_copy
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_reverse)
+        TEST_METHOD_CATEGORY(stl_reverse, "stl")
         {
             test_reverse(1);
             test_reverse(1023);
@@ -1126,7 +1117,7 @@ namespace amp_stl_algorithms_tests
             }
         }
 
-        TEST_METHOD(stl_reverse_copy)
+        TEST_METHOD_CATEGORY(stl_reverse_copy, "stl")
         {
             test_reverse_copy(1);
             test_reverse_copy(1023);
@@ -1174,7 +1165,7 @@ namespace amp_stl_algorithms_tests
             }
         };
 
-        TEST_METHOD(stl_is_sorted)
+        TEST_METHOD_CATEGORY(stl_is_sorted, "stl")
         {
             const int size = 10;
             std::vector<int> vec(size);
@@ -1218,7 +1209,7 @@ namespace amp_stl_algorithms_tests
         // swap, swap<T, N>, swap_ranges, iter_swap
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_swap_cpu)
+        TEST_METHOD_CATEGORY(stl_swap_cpu, "stl")
         {
             int a = 1;
             int b = 2;
@@ -1229,7 +1220,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(1, b);
         }
 
-        TEST_METHOD(stl_swap_amp)
+        TEST_METHOD_CATEGORY(stl_swap_amp, "stl")
         {
             const int size = 2;
             std::vector<int> vec(size);
@@ -1245,7 +1236,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(1, av[1]);
         }
 
-        TEST_METHOD(stl_swap_n_cpu)
+        TEST_METHOD_CATEGORY(stl_swap_n_cpu, "stl")
         {
             const int size = 10;
             int arr1[size];
@@ -1262,7 +1253,7 @@ namespace amp_stl_algorithms_tests
             }
         }
       
-        TEST_METHOD(stl_swap_n_amp)
+        TEST_METHOD_CATEGORY(stl_swap_n_amp, "stl")
         {
             std::array<int, 10> expected = { 6, 7, 8, 9, 10, 1, 2, 3, 4, 5 };
 
@@ -1301,7 +1292,7 @@ namespace amp_stl_algorithms_tests
             Assert::IsTrue(are_equal(expected, av));
         }
         
-        TEST_METHOD(stl_swap_ranges)
+        TEST_METHOD_CATEGORY(stl_swap_ranges, "stl")
         {
             const int size = 10;
             std::array<int, size> expected = { 0, 6, 7, 8, 4, 5, 1, 2, 3, 9 };
@@ -1316,7 +1307,7 @@ namespace amp_stl_algorithms_tests
             Assert::AreEqual(3, *--expected_end);
         }
 
-        TEST_METHOD(stl_swap_iter)
+        TEST_METHOD_CATEGORY(stl_swap_iter, "stl")
         {
             const int size = 2;
             std::vector<int> vec(size);
@@ -1336,7 +1327,7 @@ namespace amp_stl_algorithms_tests
         // transform
         //----------------------------------------------------------------------------
 
-        TEST_METHOD(stl_unary_transform)
+        TEST_METHOD_CATEGORY(stl_unary_transform, "stl")
         {
             const int size = 1024;
             std::vector<int> vec_in(size);
@@ -1359,7 +1350,7 @@ namespace amp_stl_algorithms_tests
             }
         }
 
-        TEST_METHOD(stl_binary_transform)
+        TEST_METHOD_CATEGORY(stl_binary_transform, "stl")
         {
             const int size = 1024;
 

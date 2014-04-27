@@ -79,7 +79,7 @@ namespace amp_algorithms_tests
             
             //histogram_tile<unsigned, 2, 8>(input_av, 0);
 
-            //Assert::IsTrue(are_equal(expected, input_av.section(0, 4)));
+            Assert::IsTrue(are_equal(expected, input_av.section(0, 4)));
         }
     };
 }; // namespace amp_algorithms_tests
