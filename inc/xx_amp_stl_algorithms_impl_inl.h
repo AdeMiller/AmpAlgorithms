@@ -139,7 +139,7 @@ namespace amp_stl_algorithms
                 }
             }
         });
-        }
+    }
 
     // Standard, builds of top of the non-standard async version above, and adds a sync to
     // materialize the result.

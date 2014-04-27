@@ -276,9 +276,9 @@ namespace amp_stl_algorithms_tests
             static const int n = sizeof(numbers)/sizeof(numbers[0]);
 
             array_view<const int> av(concurrency::extent<1>(n), numbers);
-            bool r1 = amp_stl_algorithms::any_of(begin(av), end(av), [] (int v) restrict(amp) -> bool { return v>10; });
+            bool r1 = amp_stl_algorithms::any_of(begin(av), end(av), [] (int v) restrict(amp) -> bool { return v > 10; });
             Assert::IsFalse(r1);
-            bool r2 = amp_stl_algorithms::any_of(begin(av), end(av), [] (int v) restrict(amp) -> bool { return v>5; });
+            bool r2 = amp_stl_algorithms::any_of(begin(av), end(av), [] (int v) restrict(amp) -> bool { return v > 5; });
             Assert::IsTrue(r2);
         }
 
