@@ -923,6 +923,58 @@ namespace amp_stl_algorithms_tests
             test_remove_if(begin(numbers4), end(numbers4));
         }
 
+        // Customer reported bug. 
+        // See: http://social.msdn.microsoft.com/Forums/vstudio/en-US/d959e3f3-2a85-4646-9c54-cae69c534b64
+
+        TEST_METHOD_CATEGORY(stl_remove_if_performance, "stl")
+        {
+            accelerator device(accelerator::default_accelerator);
+            accelerator_view view = device.default_view;
+            char buff[100];
+
+            int size = 2048 * 1088 * 5;
+            std::vector<float> h_vec(size);
+
+            // Generate random numbers
+            std::generate(h_vec.begin(), h_vec.end(), []() { return (static_cast<float>(rand()) / RAND_MAX); });
+
+            // Copy to device
+            concurrency::array<float, 1> d_vec(size);
+            double tCopy1 = time_func(view, [&]() 
+            {
+                concurrency::copy(h_vec.begin(), h_vec.end(), d_vec);
+            });
+            array_view<float, 1> d_view(d_vec);
+
+            sprintf_s<100>(buff, "Copied to GPU in %.1f ms", tCopy1);
+            Logger::WriteMessage(buff);
+
+            array_view_iterator<float> last;
+            double tRemove = time_func(view, [&]() 
+            {
+                last = amp_stl_algorithms::remove_if(begin(d_view), end(d_view), [](const float v) restrict(amp)
+                {
+                    return ((v > 0.1) && (v < 0.9));
+                });
+            });
+
+            sprintf_s<100>(buff, "amp_stl_algorithms::remove_if completed in %.1f ms", tRemove);
+            Logger::WriteMessage(buff);
+
+            int new_size = last - begin(d_view);
+            sprintf_s<100>(buff, "Before: %d elements - After: %d elements", h_vec.size(), new_size);
+            Logger::WriteMessage(buff);
+
+            h_vec.resize(new_size);
+
+            double tCopy2 = time_func(view, [&]() 
+            {
+                amp_stl_algorithms::copy(begin(d_view), last, h_vec.begin());
+            });
+            sprintf_s<100>(buff, "Copied to host in %.1f ms - Total: %.1f ms", tCopy2, tCopy1 + tRemove + tCopy2);
+            Logger::WriteMessage(buff);
+        }
+
         template <typename InIt>
         void test_remove_if(InIt first, InIt last)
         {

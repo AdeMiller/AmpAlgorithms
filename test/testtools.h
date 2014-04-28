@@ -376,4 +376,40 @@ namespace testtools
             return &delim;
         }
     } // namespace _details
+
+    //===============================================================================
+    //  Basic performance timing.
+    //===============================================================================
+
+    inline double elapsed_time(const LARGE_INTEGER& start, const LARGE_INTEGER& end)
+    {
+        LARGE_INTEGER freq;
+        QueryPerformanceFrequency(&freq);
+        return (double(end.QuadPart) - double(start.QuadPart)) * 1000.0 / double(freq.QuadPart);
+    }
+
+    template <typename Func>
+    double time_func(accelerator_view& view, Func f)
+    {
+        //  Ensure that the C++ AMP runtime is initialized.
+        accelerator::get_all();
+
+        //  Ensure that the C++ AMP kernel has been JITed.
+        f();
+
+        //  Wait for all accelerator work to end.
+        view.wait();
+
+        LARGE_INTEGER start, end;
+        QueryPerformanceCounter(&start);
+
+        f();
+
+        //  Wait for all accelerator work to end.
+        view.wait();
+        QueryPerformanceCounter(&end);
+
+        return elapsed_time(start, end);
+    }
+
 }; // namespace test_tools
