@@ -512,7 +512,7 @@ namespace amp_algorithms
             // prefix scan the histogram results to get offsets.
             // TODO: This scan supports multi-tile. Probably need a simpler version that uses only one tile.
             concurrency::array<unsigned> histogram_scan(bin_count);
-            amp_algorithms::scan s(2 * bin_count);
+            amp_algorithms::direct3d::::scan s(2 * bin_count);
             s.scan_exclusive(histogram_bins, histogram_bins);
 #if _DEBUG
             {
