@@ -53,13 +53,18 @@ class array { };
 //  Set USE_REF to use the REF accelerator for all tests. This is useful if tests fail on a particular machine as
 //  failure may be due to a driver bug.
 
-#define TEST_CATEGORY(category) TEST_METHOD_ATTRIBUTE(L"TestCategory", L#category)
-
-#define TEST_METHOD_CATEGORY(methodName, category) \
-    BEGIN_TEST_METHOD_ATTRIBUTE(methodName) \
-    TEST_CATEGORY(category) \
-    END_TEST_METHOD_ATTRIBUTE() \
+#define TEST_METHOD_CATEGORY(methodName, category)              \
+    BEGIN_TEST_METHOD_ATTRIBUTE(methodName)                     \
+        TEST_METHOD_ATTRIBUTE(L"TestCategory", L#category)      \
+    END_TEST_METHOD_ATTRIBUTE()                                 \
     TEST_METHOD(methodName)
+
+#define TEST_CLASS_CATEGORY(className, category)                \
+    TEST_CLASS(className)                                       \
+    {                                                           \
+        BEGIN_TEST_CLASS_ATTRIBUTE()                            \
+            TEST_CLASS_ATTRIBUTE(L"TestCategory", L#category)   \
+        END_TEST_CLASS_ATTRIBUTE()
 
 namespace testtools
 {

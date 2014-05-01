@@ -33,7 +33,7 @@ namespace amp_algorithms_direct3d_details_tests
     // This tests an inlined function so don't exclude this from coverage.
     TEST_CLASS(amp_direct3d_details_tests)
     {
-        TEST_METHOD_CATEGORY(amp_details_check_hresult, "amp::direct3d")
+        TEST_METHOD(amp_details_check_hresult)
         {
             try
             {
@@ -59,8 +59,8 @@ namespace amp_algorithms_direct3d_tests
 
     struct bitvector;
 
-    TEST_CLASS(amp_direct3d_scan_tests)
-    {
+    TEST_CLASS_CATEGORY(amp_direct3d_scan_tests, "amp::direct3d")
+    
         // Run smaller array sizes in debug mode as the REF accelerator is much slower.
         static const int max_debug_cols = 252;
         static const int max_debug_rows = 3;
@@ -70,7 +70,7 @@ namespace amp_algorithms_direct3d_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_scan_backwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_scan_backwards)
         {
             test_scan<float>(amp_algorithms::direct3d::scan_direction::backward);
             test_scan<unsigned int>(amp_algorithms::direct3d::scan_direction::backward);
@@ -78,7 +78,7 @@ namespace amp_algorithms_direct3d_tests
             test_scan_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::backward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_scan_forwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_scan_forwards)
         {
             test_scan<float>(amp_algorithms::direct3d::scan_direction::forward);
             test_scan<unsigned int>(amp_algorithms::direct3d::scan_direction::forward);
@@ -86,7 +86,7 @@ namespace amp_algorithms_direct3d_tests
             test_scan_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::forward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_multiscan_backwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_multiscan_backwards)
         {
             test_multiscan<int>(amp_algorithms::direct3d::scan_direction::backward);
             test_multiscan<unsigned int>(amp_algorithms::direct3d::scan_direction::backward);
@@ -94,7 +94,7 @@ namespace amp_algorithms_direct3d_tests
             test_multiscan_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::backward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_multiscan_forwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_multiscan_forwards)
         {
             test_multiscan<int>(amp_algorithms::direct3d::scan_direction::forward);
             test_multiscan<unsigned int>(amp_algorithms::direct3d::scan_direction::forward);
@@ -102,7 +102,7 @@ namespace amp_algorithms_direct3d_tests
             test_multiscan_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::forward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_segmented_scan_backwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_segmented_scan_backwards)
         {
             test_segmented<int>(amp_algorithms::direct3d::scan_direction::backward);
             test_segmented<unsigned int>(amp_algorithms::direct3d::scan_direction::backward);
@@ -110,7 +110,7 @@ namespace amp_algorithms_direct3d_tests
             test_segmented_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::backward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_segmented_scan_forwards, "amp::direct3d")
+        TEST_METHOD(amp_dx_segmented_scan_forwards)
         {
             test_segmented<int>(amp_algorithms::direct3d::scan_direction::forward);
             test_segmented<unsigned int>(amp_algorithms::direct3d::scan_direction::forward);
@@ -118,7 +118,7 @@ namespace amp_algorithms_direct3d_tests
             test_segmented_bitwise_op<int>(amp_algorithms::direct3d::scan_direction::forward);
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_scan_other, "amp::direct3d")
+        TEST_METHOD(amp_dx_scan_other)
         {
             const int elem_count = 10;
             std::vector<unsigned int> in(elem_count, 1);
@@ -148,7 +148,7 @@ namespace amp_algorithms_direct3d_tests
             }
         }
 
-        TEST_METHOD_CATEGORY(amp_dx_scan_error_handling, "amp::direct3d")
+        TEST_METHOD(amp_dx_scan_error_handling)
         {
             accelerator ref(accelerator::direct3d_ref);
             accelerator_view ref_view = ref.create_view();

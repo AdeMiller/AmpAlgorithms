@@ -36,8 +36,8 @@ namespace amp_algorithms_tests
         return msg.str();
     }
 
-    TEST_CLASS(amp_scan_tests)
-    {
+    TEST_CLASS_CATEGORY(amp_scan_tests, "amp")
+    
     private:
 
         // This is to allow the tests to pass when run on the REF accelerator. In all other cases the warp 
@@ -56,7 +56,7 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_single_warp, "amp")
+        TEST_METHOD(amp_scan_exclusive_single_warp)
         {
             std::vector<int> input(warp_size, 1);
             std::vector<int> result(input.size(), -1);
@@ -68,7 +68,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_single_warp, "amp")
+        TEST_METHOD(amp_scan_inclusive_single_warp)
         {
             std::vector<int> input(warp_size, 1);
             std::vector<int> result(input.size(), -1);
@@ -80,7 +80,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_multi_warp, "amp")
+        TEST_METHOD(amp_scan_exclusive_multi_warp)
         {
             std::vector<int> input(max_tile_size, 1);
             std::vector<int> result(input.size(), -1);
@@ -92,7 +92,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_multi_warp, "amp")
+        TEST_METHOD(amp_scan_inclusive_multi_warp)
         {
             std::vector<int> input(max_tile_size, 1);
             std::vector<int> result(input.size(), -1);
@@ -104,7 +104,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_multi_tile, "amp")
+        TEST_METHOD(amp_scan_exclusive_multi_tile)
         {
             std::vector<int> input(warp_size * 4, 1);
             std::vector<int> result(input.size(), -1);
@@ -116,7 +116,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_multi_tile, "amp")
+        TEST_METHOD(amp_scan_inclusive_multi_tile)
         {
             std::vector<int> input(warp_size * 4, 1);
             std::vector<int> result(input.size(), -1);
@@ -128,7 +128,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_multi_warp_multi_tile, "amp")
+        TEST_METHOD(amp_scan_exclusive_multi_warp_multi_tile)
         {
             std::vector<int> input(warp_size * 4 * 4, 1);
             std::vector<int> result(input.size(), -1);
@@ -140,7 +140,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_multi_warp_multi_tile, "amp")
+        TEST_METHOD(amp_scan_inclusive_multi_warp_multi_tile)
         {
             std::vector<int> input(warp_size * 4 * 4, 1);
             std::vector<int> result(input.size(), -1);
@@ -152,7 +152,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_incomplete_warp, "amp")
+        TEST_METHOD(amp_scan_exclusive_incomplete_warp)
         {
             std::vector<int> input(warp_size + 2, 1);
             std::vector<int> result(input.size(), -1);
@@ -164,7 +164,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result, 36).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_incomplete_warp, "amp")
+        TEST_METHOD(amp_scan_inclusive_incomplete_warp)
         {
             std::vector<int> input(warp_size + 2, 1);
             std::vector<int> result(input.size(), -1);
@@ -176,7 +176,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result, 36).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_overlapped_input_and_output, "amp")
+        TEST_METHOD(amp_scan_exclusive_overlapped_input_and_output)
         {
             std::vector<int> input(1024);
             generate_data(input);
@@ -188,7 +188,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == input, Msg(expected, input).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_overlapped_input_and_output, "amp")
+        TEST_METHOD(amp_scan_inclusive_overlapped_input_and_output)
         {
             std::vector<int> input(1024);
             generate_data(input);
@@ -200,7 +200,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == input, Msg(expected, input).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive_recursive_scan, "amp")
+        TEST_METHOD(amp_scan_exclusive_recursive_scan)
         {
             std::vector<int> input(warp_size * (warp_size + 2), 1);
             std::vector<int> result(input.size(), -1);
@@ -212,7 +212,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive_recursive_scan, "amp")
+        TEST_METHOD(amp_scan_inclusive_recursive_scan)
         {
             std::vector<int> input(warp_size * (warp_size + 2), 1);
             std::vector<int> result(input.size(), -1);
@@ -224,7 +224,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_exclusive, "amp")
+        TEST_METHOD(amp_scan_exclusive)
         {
             const int tile_size = warp_size * 4;
             std::vector<int> input(tile_size * (tile_size + 10));
@@ -238,7 +238,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(expected == result, Msg(expected, result).c_str());
         }
 
-        TEST_METHOD_CATEGORY(amp_scan_inclusive, "amp")
+        TEST_METHOD(amp_scan_inclusive)
         {
             const int tile_size = warp_size * 4;
             std::vector<int> input(tile_size * (tile_size + 10));
