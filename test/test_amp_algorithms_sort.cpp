@@ -38,49 +38,48 @@ namespace amp_algorithms_tests
             set_default_accelerator();
         }
 
-        TEST_METHOD(aaa_radix_key_value_tests)
+        TEST_METHOD(amp_details_radix_key_value_tests)
         {
-            std::array<std::pair<int, int>, 16> theories =
+            enum parameter
+            {
+                index = 0,
+                value = 1,
+                expected = 2
+            };
+            std::array<std::tuple<int, int, int>, 16> theories =
             { 
-                std::make_pair( 3, 3),
-                std::make_pair( 2, 2),
-                std::make_pair( 1, 1),
-                std::make_pair( 6, 2),
-                std::make_pair(10, 2),
-                std::make_pair(11, 3),
-                std::make_pair(13, 1),
-                std::make_pair(16, 0),
-                std::make_pair(15, 3),
-                std::make_pair(10, 2),
-                std::make_pair( 5, 1),
-                std::make_pair(14, 2),
-                std::make_pair( 4, 0),
-                std::make_pair(12, 0),
-                std::make_pair( 7, 3),
-                std::make_pair( 8, 0)
+                std::make_tuple(0, 3, 3),
+                std::make_tuple(0, 1, 1),
+                std::make_tuple(1, 3, 0),
+                std::make_tuple(1, 12, 3),
+                std::make_tuple(1, 13, 0),
             };
 
             for (auto t : theories)
             {
-                Assert::AreEqual(t.second, radix_key_value<int, 2>(t.first, 0));
+                Assert::AreEqual(std::get<parameter::expected>(t), radix_key_value<int, 2>(std::get<parameter::value>(t), std::get<parameter::index>(t)));
             }
         }
 
-        //TEST_METHOD(aaa_amp_sort_radix)
-        //{
-        //    std::array<unsigned, 16> input = {  3,  2,  1,  6, 10, 11, 13, 16, 15, 10,  5, 14,  4, 12,  9,  8 };
-        //    //                                  3   2   1   2   2   3   1   0   3   2   1   2   0   0   1   0
-        //    //std::array<unsigned, 4> expected = { 3, 2, 1, 6 };
-        //    std::array<int, 4> expected = { 4, 4, 5, 3 };
-        //    //std::array<unsigned, 4> expected = { 0, 4, 9, 12 };
-        //    array_view<unsigned> input_av(int(input.size()), input);
+        TEST_METHOD(amp_details_sort_radix)
+        {
+            std::array<unsigned, 16> input = {  3,  2,  1,  6, 10, 11, 13, 16, 15, 10,  5, 14,  4, 12,  9,  8 };
+            // Key 0 values, 2 bit key:         3   2   1   2   2   3   1   0   3   2   1   2   0   0   1   0
 
-        //    //radix_sort(input_av);
-        //    
-        //    //histogram_tile<unsigned, 2, 8>(input_av, 0);
+            // Bin counts:                      4, 4, 5, 3
+            // Scan values                      0, 4, 8, 13
 
-        //    Assert::IsTrue(are_equal(expected, input_av.section(0, 4)));
-        //}
+            //std::array<unsigned, 4> expected = { 3, 2, 1, 6 };
+            std::array<int, 4> expected = { 4, 4, 5, 3 };
+            //std::array<unsigned, 4> expected = { 0, 4, 9, 12 };
+            array_view<unsigned> input_av(int(input.size()), input);
+            //amp_algorithms::_details::radix_sort_key<unsigned, 2, 4>(input_av, input_av, 0);
+            //radix_sort(input_av);
+            
+            //histogram_tile<unsigned, 2, 8>(input_av, 0);
+
+            Assert::IsTrue(are_equal(expected, input_av.section(0, 4)));
+        }
     };
 }; // namespace amp_algorithms_tests
 

@@ -114,7 +114,7 @@ namespace amp_algorithms
                 Microsoft::WRL::ComPtr<ID3D11Buffer> flags_buffer(_details::_get_d3d11_buffer_ptr(flags_array));
                 Microsoft::WRL::ComPtr<ID3D11Buffer> dst_buffer(_details::_get_d3d11_buffer_ptr(output_array));
 
-                // Create typed uavs
+                // Create typed UAVs
                 Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> src_view(_details::_create_d3d11_uav(m_device, src_buffer, _details::_dx_scan_type_helper<T>::dx_view_type));
                 Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> flags_view(_details::_create_d3d11_uav(m_device, flags_buffer, DXGI_FORMAT_R32_UINT));
                 // 2nd view is only needed if destination buffer is different from source buffer (not-in-place scan)

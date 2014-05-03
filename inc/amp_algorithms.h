@@ -421,15 +421,16 @@ namespace amp_algorithms
     // TODO: Move this to the impl file?
     namespace _details
     {
-        template<typename T, int key_size>
+        template<typename T, int key_bit_width>
         int radix_key_value(const T value, const unsigned key_idx) restrict(amp, cpu)
         {
-            const T mask = (1 << key_size) - 1;
-            return (value & (mask << key_idx)) >> key_idx;
+            const T mask = (1 << key_bit_width) - 1;
+            const unsigned key_offset = key_idx * key_bit_width;
+            return (value & (mask << key_offset)) >> key_offset;
         }
 
         // TODO: T is limited to only integer types. Need to modify the template to restrict this.
-        template <typename T, int key_size, int tile_size>
+        template <typename T, int key_bit_width, int tile_size>
         void radix_sort(const concurrency::accelerator_view& accl_view, concurrency::array_view<T>& input_view)
         {
         }
@@ -443,14 +444,13 @@ namespace amp_algorithms
             }
         }
 
-        template <typename T, int key_size, int tile_size>
-        void histogram_tile(const concurrency::array_view<T>& input_view, concurrency::array_view<T>& output_view,
-            const int key_idx)
+        template <typename T, int key_bit_width, int tile_size>
+        void radix_sort_key(const concurrency::array_view<T>& input_view, concurrency::array_view<T>& output_view, const int key_idx)
         {
             static const unsigned type_width = sizeof(T)* 8;
-            static_assert((type_width % key_size == 0), "The sort key width must be an exact multiple of the type width.");
+            static_assert((type_width % key_bit_width == 0), "The sort key width must be an exact multiple of the type width.");
 
-            static const unsigned bin_count = 1 << key_size;
+            static const unsigned bin_count = 1 << key_bit_width;
             static const T bin_mask = bin_count - 1;
             static const int elements_per_thread = 1;          // TODO: Doesn't have to be a constant?
 
@@ -487,7 +487,7 @@ namespace amp_algorithms
                 for (int i = start_elem; i < (start_elem + elements_per_thread); ++i)
                 {
                     if (gidx < input_view.extent[0])
-                        tile_bins[idx][_details::radix_key_value<T, key_size>(input_view[gidx], key_idx)]++;
+                        tile_bins[idx][_details::radix_key_value<T, key_bit_width>(input_view[gidx], key_idx)]++;
                 }
 
                 // Wait for all threads to finish incrementing.
@@ -518,18 +518,15 @@ namespace amp_algorithms
                 concurrency::copy(histogram_bins, begin(bins));
             }
 #endif
-            // prefix scan the histogram results to get offsets.
             // TODO: This scan supports multi-tile. Probably need a simpler version that uses only one tile.
-            concurrency::array<unsigned> histogram_scan(bin_count);
-            amp_algorithms::direct3d::::scan s(2 * bin_count);
-            s.scan_exclusive(histogram_bins, histogram_bins);
+            amp_algorithms::scan_new<tile_size, scan_mode::exclusive>(histogram_bins, histogram_bins, amp_algorithms::plus<unsigned int>());
 #if _DEBUG
             {
                 std::vector<unsigned> scans(4);
                 concurrency::copy(histogram_bins, begin(scans));
             }
 #endif
-            // Sort elements for each tile to maximise memory affinity when writing to global memory.
+            // Sort elements for each tile to maximize memory affinity when writing to global memory.
 
             // reorder the elements based on the offsets.
 
@@ -540,7 +537,7 @@ namespace amp_algorithms
                 const int idx = tidx.local[0];
 
                 const int d = idx - 0;
-                output_view[d] = input_view[];
+                output_view[d] = input_view[d];
             });
         }
     }
