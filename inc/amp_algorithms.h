@@ -32,7 +32,7 @@
 
 namespace amp_algorithms
 {
-#pragma region Arithmetic, comparison, logical and bitwise,
+#pragma region Arithmetic, comparison, logical and bitwise operators
     //----------------------------------------------------------------------------
     // Arithmetic operations
     //----------------------------------------------------------------------------
@@ -322,13 +322,44 @@ namespace amp_algorithms
 #pragma endregion
 
     //----------------------------------------------------------------------------
+    // padded_read & padded_write
+    //----------------------------------------------------------------------------
+
+    template <typename InputIndexableView, int N>
+    inline typename InputIndexableView::value_type padded_read(const InputIndexableView& arr, const concurrency::index<N> idx) restrict(cpu, amp)
+    {
+        return arr.extent.contains(idx) ? arr[idx] : typename InputIndexableView::value_type();
+    }
+
+    template <typename InputIndexableView>
+    inline typename InputIndexableView::value_type padded_read(const InputIndexableView& arr, const int idx) restrict(cpu, amp)
+    {
+        return padded_read<InputIndexableView, 1>(arr, concurrency::index<1>(idx));
+    }
+
+    template <typename InputIndexableView, int N>
+    inline void padded_write(InputIndexableView& arr, const concurrency::index<N> idx, const typename InputIndexableView::value_type &value) restrict(cpu, amp)
+    {
+        if (arr.extent.contains(idx))
+        {
+            arr[idx] = value;
+        }
+    }
+
+    template <typename InputIndexableView>
+    inline void padded_write(InputIndexableView& arr, const int idx, const typename InputIndexableView::value_type &value) restrict(cpu, amp)
+    {
+        padded_write<InputIndexableView, 1>(arr, concurrency::index<1>(idx), value);
+    }
+
+    //----------------------------------------------------------------------------
     // fill
     //----------------------------------------------------------------------------
 
     template<typename OutputIndexableView, typename T>
     void fill(const concurrency::accelerator_view &accl_view, OutputIndexableView& output_view, const T& value)
     {
-        :::amp_algorithms::generate(accl_view, output_view, [value]() restrict(amp) { return value; });
+        ::amp_algorithms::generate(accl_view, output_view, [value]() restrict(amp) { return value; });
     }
 
     template<typename OutputIndexableView, typename T>
@@ -373,37 +404,6 @@ namespace amp_algorithms
     }
 
     //----------------------------------------------------------------------------
-    // padded_read & padded_write
-    //----------------------------------------------------------------------------
-
-    template <typename TContainer, int N>
-    inline typename TContainer::value_type padded_read(const TContainer& arr, const concurrency::index<N> idx) restrict(cpu, amp)
-    {
-        return arr.extent.contains(idx) ? arr[idx] : typename TContainer::value_type();
-    }
-
-    template <typename TContainer>
-    inline typename TContainer::value_type padded_read(const TContainer& arr, const int idx) restrict(cpu, amp)
-    {
-        return padded_read<TContainer, 1>(arr, concurrency::index<1>(idx));
-    }
-
-    template <typename TContainer, int N>
-    inline void padded_write(TContainer& arr, const concurrency::index<N> idx, const typename TContainer::value_type &value) restrict(cpu, amp)
-    {
-        if (arr.extent.contains(idx))
-        {
-            arr[idx] = value;
-        }
-    }
-
-    template <typename TContainer>
-    inline void padded_write(TContainer& arr, const int idx, const typename TContainer::value_type &value) restrict(cpu, amp)
-    {
-        padded_write<TContainer, 1>(arr, concurrency::index<1>(idx), value);
-    }
-
-    //----------------------------------------------------------------------------
     // radix_sort
     //----------------------------------------------------------------------------
     // http://www.heterogeneouscompute.org/wordpress/wp-content/uploads/2011/06/RadixSort.pdf
@@ -432,6 +432,15 @@ namespace amp_algorithms
         template <typename T, int key_size, int tile_size>
         void radix_sort(const concurrency::accelerator_view& accl_view, concurrency::array_view<T>& input_view)
         {
+        }
+
+        template<typename T>
+        inline void merge_bins(const T* left, const T*  right, const int bin_count) restrict(amp)
+        {
+            for (int b = 0; b < bin_count; ++b)
+            {
+                left[b] += right[b];
+            }
         }
 
         template <typename T, int key_size, int tile_size>
@@ -536,15 +545,6 @@ namespace amp_algorithms
         }
     }
 
-    template<typename T>
-    inline void merge_bins(const T* left, const T*  right, const int bin_count) restrict(amp)
-    {
-        for (int b = 0; b < bin_count; ++b)
-        {
-            left[b] += right[b];
-        }
-    }
-
     // TODO: NOT IMPLEMENTED radix_sort
     inline void radix_sort(const concurrency::accelerator_view& accl_view, concurrency::array_view<int>& input_view)
     {
@@ -585,14 +585,14 @@ namespace amp_algorithms
     typename std::result_of<BinaryFunction(const typename indexable_view_traits<InputIndexableView>::value_type&, const typename indexable_view_traits<InputIndexableView>::value_type&)>::type
         reduce(const concurrency::accelerator_view &accl_view, const InputIndexableView &input_view, const BinaryFunction &binary_op)
     {
-            return _details::reduce<512, 10000, InputIndexableView, BinaryFunction>(accl_view, input_view, binary_op);
+        return _details::reduce<512, 10000, InputIndexableView, BinaryFunction>(accl_view, input_view, binary_op);
     }
 
     template <typename InputIndexableView, typename BinaryFunction>
     typename std::result_of<BinaryFunction(const typename indexable_view_traits<InputIndexableView>::value_type&, const typename indexable_view_traits<InputIndexableView>::value_type&)>::type
         reduce(const InputIndexableView &input_view, const BinaryFunction &binary_op)
     {
-            return reduce(_details::auto_select_target(), input_view, binary_op);
+        return reduce(_details::auto_select_target(), input_view, binary_op);
     }
 
     //----------------------------------------------------------------------------
@@ -608,6 +608,8 @@ namespace amp_algorithms
     // https://sites.google.com/site/duanemerrill/ScanTR2.pdf
     //
     // TODO: There may be some better scan implementations that are described in the second reference. Investigate.
+    // TODO: Scan only supports Rank of 1.
+    // TODO: Scan does not support segmented scan or forwards/backwards.
 
     enum class scan_mode : int
     {
@@ -615,7 +617,6 @@ namespace amp_algorithms
         inclusive = 1
     };
 
-    // TODO: Duplicated in both amp and direct3d namespaces. Fix this?
     enum class scan_direction : int
     {
         forward = 0,
@@ -630,8 +631,6 @@ namespace amp_algorithms
         static const int warp_size = 32;
 #endif
         static const int warp_max = _details::warp_size - 1;
-
-        // TODO: Scan still needs optimizing.
 
         template <scan_mode _Mode, typename _BinaryOp, typename T>
         T scan_warp(T* const tile_data, const int idx, const _BinaryOp& op) restrict(amp)
@@ -689,99 +688,96 @@ namespace amp_algorithms
         }
     } // namespace _details
 
-    template <int TileSize, scan_mode _Mode, typename _BinaryOp, typename T>
-    inline void scan_new(const concurrency::array<T, 1>& input_array, concurrency::array<T, 1>& output_array, const _BinaryOp& op)
+    template <int TileSize, scan_mode _Mode, typename _BinaryFunc, typename InputIndexableView>
+    inline void scan(const InputIndexableView& input_view, InputIndexableView& output_view, const _BinaryFunc& op)
+    {
+        scan<TileSize, _Mode, _BinaryFunc>(_details::auto_select_target(), input_view, output_view, op);
+    }
+
+    template <int TileSize, scan_mode _Mode, typename _BinaryFunc, typename InputIndexableView>
+    inline void scan(const concurrency::accelerator_view& accl_view, const InputIndexableView& input_view, InputIndexableView& output_view, const _BinaryFunc& op)
     {
         static_assert(TileSize >= _details::warp_size, "Tile size must be at least the size of a single warp.");
         static_assert(TileSize % _details::warp_size == 0, "Tile size must be an exact multiple of warp size.");
         static_assert(TileSize <= (_details::warp_size * _details::warp_size), "Tile size must less than or equal to the square of the warp size.");
 
-        assert(output_array.extent[0] >= _details::warp_size);
-        auto compute_domain = output_array.extent.tile<TileSize>().pad();
-        concurrency::array<T, 1> tile_results(compute_domain / TileSize);
+        typedef InputIndexableView::value_type T;
 
+        assert(output_view.extent[0] >= _details::warp_size);
+        auto compute_domain = output_view.extent.tile<TileSize>().pad();
+        concurrency::array<T, 1> tile_results(compute_domain / TileSize);
+        concurrency::array_view<T, 1> tile_results_vw(tile_results);
         // 1 & 2. Scan all tiles and store results in tile_results.
-        concurrency::parallel_for_each(compute_domain,
-            [=, &input_array, &output_array, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
+        concurrency::parallel_for_each(accl_view, compute_domain, [=](concurrency::tiled_index<TileSize> tidx) restrict(amp)
         {
             const int gidx = tidx.global[0];
             const int lidx = tidx.local[0];
             tile_static T tile_data[TileSize];
-            tile_data[lidx] = padded_read(input_array, gidx);
+            tile_data[lidx] = padded_read(input_view, gidx);
             tidx.barrier.wait_with_tile_static_memory_fence();
 
             auto val = _details::scan_tile<TileSize, _Mode>(tile_data, tidx, amp_algorithms::plus<T>());
             if (lidx == (TileSize - 1))
             {
-                tile_results[tidx.tile[0]] = val;
+                tile_results_vw[tidx.tile[0]] = val;
                 if (_Mode == scan_mode::exclusive)
-                    tile_results[tidx.tile[0]] += input_array[gidx];
+                    tile_results_vw[tidx.tile[0]] += input_view[gidx];
             }
-            padded_write(output_array, gidx, tile_data[lidx]);
+            padded_write(output_view, gidx, tile_data[lidx]);
         });
 
         // 3. Scan tile results.
         if (tile_results.extent[0] > TileSize)
         {
-            scan_new<TileSize, amp_algorithms::scan_mode::exclusive>(tile_results, tile_results, op);
+            scan<TileSize, amp_algorithms::scan_mode::exclusive>(accl_view, tile_results_vw, tile_results_vw, op);
         }
         else
         {
-            concurrency::parallel_for_each(compute_domain,
-                [=, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
+            concurrency::parallel_for_each(accl_view, compute_domain, [=](concurrency::tiled_index<TileSize> tidx) restrict(amp)
             {
                 const int gidx = tidx.global[0];
                 const int lidx = tidx.local[0];
                 tile_static T tile_data[TileSize];
-                tile_data[lidx] = tile_results[gidx];
+                tile_data[lidx] = tile_results_vw[gidx];
                 tidx.barrier.wait_with_tile_static_memory_fence();
 
                 _details::scan_tile<TileSize, amp_algorithms::scan_mode::exclusive>(tile_data, tidx, amp_algorithms::plus<T>());
 
-                tile_results[gidx] = tile_data[lidx];
+                tile_results_vw[gidx] = tile_data[lidx];
                 tidx.barrier.wait_with_tile_static_memory_fence();
             });
         }
         // 4. Add the tile results to the individual results for each tile.
-        concurrency::parallel_for_each(compute_domain,
-            [=, &output_array, &tile_results](concurrency::tiled_index<TileSize> tidx) restrict(amp)
+        concurrency::parallel_for_each(accl_view, compute_domain, [=](concurrency::tiled_index<TileSize> tidx) restrict(amp)
         {
             const int gidx = tidx.global[0];
-            if (gidx < output_array.extent[0])
-                output_array[gidx] += tile_results[tidx.tile[0]];
+            if (gidx < output_view.extent[0])
+                output_view[gidx] += tile_results_vw[tidx.tile[0]];
         });
     }
 
-    // TODO: Refactor this to remove duplicate code. Also need to decide on final API.
-
-    template <int TileSize, typename InIt, typename OutIt>
-    inline void scan_exclusive_new(InIt first, InIt last, OutIt dest_first)
+    template <typename IndexableView>
+    void scan_exclusive(const concurrency::accelerator_view& accl_view, const IndexableView& input_view, IndexableView& output_view)
     {
-        typedef InIt::value_type T;
-
-        const int size = int(std::distance(first, last));
-        concurrency::array<T, 1> in(size);
-        concurrency::array<T, 1> out(size);
-        concurrency::copy(first, last, in);
-
-        scan_new<TileSize, amp_algorithms::scan_mode::exclusive>(in, out, amp_algorithms::plus<T>());
-
-        concurrency::copy(out, dest_first);
+        scan<512, amp_algorithms::scan_mode::exclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
     }
 
-    template <int TileSize, typename InIt, typename OutIt>
-    inline void scan_inclusive_new(InIt first, InIt last, OutIt dest_first)
+    template <typename IndexableView>
+    void scan_exclusive(const IndexableView& input_view, IndexableView& output_view)
     {
-        typedef InIt::value_type T;
+        scan<512, amp_algorithms::scan_mode::exclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
+    }
 
-        const int size = int(std::distance(first, last));
-        concurrency::array<T, 1> in(size);
-        concurrency::array<T, 1> out(size);
-        concurrency::copy(first, last, in);
+    template <typename IndexableView>
+    void scan_inclusive(const concurrency::accelerator_view& accl_view, const IndexableView& input_view, IndexableView& output_view)
+    {
+        scan<512, amp_algorithms::scan_mode::inclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
+    }
 
-        scan_new<TileSize, amp_algorithms::scan_mode::inclusive>(in, out, amp_algorithms::plus<T>());
-
-        concurrency::copy(out, dest_first);
+    template <typename IndexableView>
+    void scan_inclusive(const IndexableView& input_view, IndexableView& output_view)
+    {
+        scan<512, amp_algorithms::scan_mode::inclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
     }
 
     //----------------------------------------------------------------------------

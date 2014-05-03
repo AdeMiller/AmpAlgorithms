@@ -125,7 +125,7 @@ namespace amp_algorithms_direct3d_tests
 
             concurrency::array<unsigned int> input(concurrency::extent<1>(elem_count), in.begin());
             // use max_scan_size and max_scan_count greater than actual usage
-            scan s(2 * elem_count, elem_count);
+            amp_algorithms::direct3d::scan s(2 * elem_count, elem_count);
 
             // 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 ->
             s.scan_exclusive(input, input);
@@ -159,31 +159,31 @@ namespace amp_algorithms_direct3d_tests
             concurrency::array<unsigned int> input(concurrency::extent<1>(elem_count), in.begin(), ref_view);
 
             Assert::ExpectException<runtime_exception>([&]() {
-                scan s2(2 * elem_count, elem_count, accelerator().default_view);
+                amp_algorithms::direct3d::scan s2(2 * elem_count, elem_count, accelerator().default_view);
                 s2.scan_exclusive(input, input);
             }, 
                 L"Expected exception for non-matching accelerator_view in scan object");
 
             Assert::ExpectException<runtime_exception>([&]() {
-                scan s2(2 * elem_count, elem_count, ref_view);
+                amp_algorithms::direct3d::scan s2(2 * elem_count, elem_count, ref_view);
                 concurrency::array<unsigned int> output(elem_count, ref.create_view());
                 s2.scan_exclusive(input, output);
             },
                 L"Expected exception for non-matching accelerator_view in output");
 
             Assert::ExpectException<runtime_exception>([&]() {
-                scan s2(elem_count-1, ref_view);
+                amp_algorithms::direct3d::scan s2(elem_count - 1, ref_view);
                 s2.scan_exclusive(input, input);
             },
                 L"Expected exception for scan object with max_scan_size < scan_size");
 
             Assert::ExpectException<runtime_exception>([&]() {
-                scan s2(elem_count, 0, ref_view);
+                amp_algorithms::direct3d::scan s2(elem_count, 0, ref_view);
             },
                 L"Expected exception for scan object with max_scan_count == 0");
 
             Assert::ExpectException<runtime_exception>([&]() {
-                scan s2(elem_count, 1, ref_view);
+                amp_algorithms::direct3d::scan s2(elem_count, 1, ref_view);
                 concurrency::array<unsigned int, 2> in2(10, 10);
                 s2.multi_scan_exclusive(in2, in2, amp_algorithms::direct3d::scan_direction::forward, amp_algorithms::plus<unsigned int>());
             },
@@ -216,7 +216,7 @@ namespace amp_algorithms_direct3d_tests
             bitvector flags(column_count);
 
             // Construct scan object
-            scan s(column_count, row_count);
+            amp_algorithms::direct3d::scan s(column_count, row_count);
 
             // Run scan
             if (test_type == scan_type::multiscan)

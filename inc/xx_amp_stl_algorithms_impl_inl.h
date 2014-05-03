@@ -203,7 +203,7 @@ namespace amp_stl_algorithms
             map_vw[idx] = (idx < element_count) ? static_cast<unsigned int>(pred(src_view[idx])) : 0;
         });
 
-        amp_algorithms::scan_new<tile_size, scan_mode::exclusive>(map, map, amp_algorithms::plus<unsigned int>());
+        amp_algorithms::scan_exclusive(map_vw, map_vw);
 
         // Old implementation used direct3d::scan() Now using a pure C++ AMP version with no dependency on Direct 3D.
         //map_vw.synchronize();
