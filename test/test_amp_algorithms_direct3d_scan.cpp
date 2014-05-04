@@ -131,7 +131,7 @@ namespace amp_algorithms_direct3d_tests
             s.scan_exclusive(input, input);
             // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 ->
             s.scan_exclusive(input, input, amp_algorithms::direct3d::scan_direction::forward, amp_algorithms::plus<unsigned int>());
-            // 0, 0, 1, 3, 6, 10, 15, 21, 28, 36 -> 
+            // 0, 0, 1, 3, 6, 10, 15, 21, 28, 36 ->
 
             unsigned int flg = 8; // 001000 in binary, so our segment is in here: 0, 0, 1, | 3, 6, 10, 15, 21, 28, 36
             concurrency::array<unsigned int> flags(1, &flg);
