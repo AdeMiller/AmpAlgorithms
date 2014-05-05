@@ -36,17 +36,16 @@ namespace examples
     {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
-#if defined(USE_REF)
-            bool set_ok = accelerator::set_default(accelerator::direct3d_ref);
-
-            if (!set_ok)
-            {
-                Logger::WriteMessage("Unable to set default accelerator to REF.");
-            }
-#endif
+            testtools::set_default_accelerator(L"stl_examples");
         }
 
         // TODO: Replace stl_example_hello_world with SAXPY
+        BEGIN_TEST_METHOD_ATTRIBUTE(stl_example_hello_world)
+            TEST_CATEGORY("stl")
+#if (defined(USE_REF) || defined(_DEBUG))
+            TEST_IGNORE()
+#endif
+        END_TEST_METHOD_ATTRIBUTE()
         TEST_METHOD(stl_example_hello_world)
         {
             auto size = testtools::test_array_size<int>();
@@ -80,6 +79,12 @@ namespace examples
         }
 
         // Calculate the volume of a set of randomly generated tetrahedrons each with one vertex at (0, 0, 0)
+        BEGIN_TEST_METHOD_ATTRIBUTE(stl_example_map_reduce)
+            TEST_CATEGORY("stl")
+#if (defined(USE_REF) || defined(_DEBUG))
+            TEST_IGNORE()
+#endif
+        END_TEST_METHOD_ATTRIBUTE()
         TEST_METHOD(stl_example_map_reduce)
         {
             struct vertices

@@ -622,7 +622,7 @@ namespace amp_algorithms
 
     namespace _details
     {
-#ifdef USE_REF
+#if (defined(USE_REF) || defined(_DEBUG))
         static const int warp_size = 4;
 #else
         static const int warp_size = 32;
@@ -697,10 +697,10 @@ namespace amp_algorithms
         static_assert(TileSize >= _details::warp_size, "Tile size must be at least the size of a single warp.");
         static_assert(TileSize % _details::warp_size == 0, "Tile size must be an exact multiple of warp size.");
         static_assert(TileSize <= (_details::warp_size * _details::warp_size), "Tile size must less than or equal to the square of the warp size.");
+        assert(output_view.extent[0] >= _details::warp_size);
 
         typedef InputIndexableView::value_type T;
 
-        assert(output_view.extent[0] >= _details::warp_size);
         auto compute_domain = output_view.extent.tile<TileSize>().pad();
         concurrency::array<T, 1> tile_results(compute_domain / TileSize);
         concurrency::array_view<T, 1> tile_results_vw(tile_results);

@@ -42,7 +42,7 @@ namespace amp_algorithms_tests
 
         // This is to allow the tests to pass when run on the REF accelerator. In all other cases the warp 
         // size should be assumed to be 32.
-#ifdef USE_REF
+#if (defined(USE_REF) || defined(_DEBUG))
         static const int warp_size = 4;
         static const int max_tile_size = warp_size * warp_size;
 #else
@@ -53,7 +53,7 @@ namespace amp_algorithms_tests
     public:
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
-            set_default_accelerator();
+            set_default_accelerator(L"amp_scan_tests");
         }
 
         TEST_METHOD(amp_scan_exclusive_single_warp)
@@ -207,6 +207,21 @@ namespace amp_algorithms_tests
             std::iota(begin(expected), end(expected), 1);
 
             scan<warp_size, scan_mode::inclusive>(input_vw, input_vw, amp_algorithms::plus<int>());
+
+            input_vw.synchronize();
+            Assert::IsTrue(expected == input, Msg(expected, input).c_str());
+        }
+
+        TEST_METHOD(amp_scan_exclusive_2)
+        {
+            std::array<int, 12> input_data = { 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1 };
+            std::vector<int> input(32);
+            std::copy(begin(input_data), end(input_data), begin(input));
+            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            std::vector<int> expected(input.size());
+            scan_sequential_exclusive(begin(input), end(input), begin(expected));
+
+            scan<warp_size, scan_mode::exclusive>(input_vw, input_vw, amp_algorithms::plus<int>());
 
             input_vw.synchronize();
             Assert::IsTrue(expected == input, Msg(expected, input).c_str());

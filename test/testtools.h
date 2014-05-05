@@ -53,9 +53,11 @@ class array { };
 //  Set USE_REF to use the REF accelerator for all tests. This is useful if tests fail on a particular machine as
 //  failure may be due to a driver bug.
 
+#define TEST_CATEGORY(category)  TEST_METHOD_ATTRIBUTE(L"TestCategory", L#category)
+
 #define TEST_METHOD_CATEGORY(methodName, category)              \
     BEGIN_TEST_METHOD_ATTRIBUTE(methodName)                     \
-        TEST_METHOD_ATTRIBUTE(L"TestCategory", L#category)      \
+        TEST_CATEGORY(L#category)                               \
     END_TEST_METHOD_ATTRIBUTE()                                 \
     TEST_METHOD(methodName)
 
@@ -68,16 +70,30 @@ class array { };
 
 namespace testtools
 {
-    inline void set_default_accelerator()
+    inline void log_accellerator(std::wstring test_name)
     {
-#if defined(USE_REF)
-        bool set_ok = accelerator::set_default(accelerator::direct3d_ref);
+        std::wstringstream str;
+        str << "Running '" << test_name << "' tests on '" <<
+            accelerator().description.c_str() << "', " << accelerator().device_path.c_str() << "." << std::endl;
+        Logger::WriteMessage(str.str().c_str());
+    }
+
+    inline void set_default_accelerator(std::wstring test_name)
+    {
+#if (defined(USE_REF) || defined(_DEBUG))
+        std::wstring dev_path = accelerator().device_path;
+        bool set_ok = accelerator::set_default(accelerator::direct3d_ref) || 
+            (dev_path == accelerator::direct3d_ref);
 
         if (!set_ok)
         {
-            Logger::WriteMessage("Unable to set default accelerator to REF.");
+            std::wstringstream str;
+            str << "Unable to set default accelerator to REF. Using " << dev_path << "." << std::endl;
+            Logger::WriteMessage(str.str().c_str());
         }
 #endif
+        log_accellerator(test_name);
+        accelerator().get_default_view().flush();
     }
 
     //===============================================================================
