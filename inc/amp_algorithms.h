@@ -421,15 +421,6 @@ namespace amp_algorithms
     // TODO: Move this to the impl file?
     namespace _details
     {
-#if (defined(USE_REF) || defined(_DEBUG))
-        static const int warp_size = 4;
-        static const int max_tile_size = warp_size * warp_size;
-        static const int default_tile_size = 8;
-#else
-        static const int warp_size = 32;
-        static const int max_tile_size = warp_size * warp_size;
-        static const int default_tile_size = 512;
-#endif
         template<typename T, int key_bit_width>
         int radix_key_value(const T value, const unsigned key_idx) restrict(amp, cpu)
         {
@@ -617,6 +608,7 @@ namespace amp_algorithms
     // TODO: There may be some better scan implementations that are described in the second reference. Investigate.
     // TODO: Scan only supports Rank of 1.
     // TODO: Scan does not support segmented scan or forwards/backwards.
+    // TODO: Scan uses information about the warp size. Consider using an algorithm that does not need to use this.
 
     enum class scan_mode : int
     {
@@ -632,23 +624,32 @@ namespace amp_algorithms
 
     namespace _details
     {
+        // The current scan implementation uses the warp size.
+#if (defined(USE_REF) || defined(_DEBUG))
+        static const int scan_warp_size = 4;
+        static const int scan_default_tile_size = 8;
+#else
+        static const int scan_warp_size = 32;
+        static const int scan_default_tile_size = 512;
+#endif
+
         template <scan_mode _Mode, typename _BinaryOp, typename T>
         T scan_warp(T* const tile_data, const int idx, const _BinaryOp& op) restrict(amp)
         {
-            const int warp_max = _details::warp_size - 1;
+            const int warp_max = _details::scan_warp_size - 1;
             const int widx = idx & warp_max;
 
             if (widx >= 1)
                 tile_data[idx] = op(tile_data[idx - 1], tile_data[idx]);
-            if ((warp_size > 2) && (widx >= 2))
+            if ((scan_warp_size > 2) && (widx >= 2))
                 tile_data[idx] = op(tile_data[idx - 2], tile_data[idx]);
-            if ((warp_size > 4) && (widx >= 4))
+            if ((scan_warp_size > 4) && (widx >= 4))
                 tile_data[idx] = op(tile_data[idx - 4], tile_data[idx]);
-            if ((warp_size > 8) && (widx >= 8))
+            if ((scan_warp_size > 8) && (widx >= 8))
                 tile_data[idx] = op(tile_data[idx - 8], tile_data[idx]);
-            if ((warp_size > 16) && (widx >= 16))
+            if ((scan_warp_size > 16) && (widx >= 16))
                 tile_data[idx] = op(tile_data[idx - 16], tile_data[idx]);
-            if ((warp_size > 32) && (widx >= 32))
+            if ((scan_warp_size > 32) && (widx >= 32))
                 tile_data[idx] = op(tile_data[idx - 32], tile_data[idx]);
 
             if (_Mode == scan_mode::inclusive)
@@ -659,11 +660,11 @@ namespace amp_algorithms
         template <int TileSize, scan_mode _Mode, typename _BinaryOp, typename T>
         T scan_tile(T* const tile_data, concurrency::tiled_index<TileSize> tidx, const _BinaryOp& op) restrict(amp)
         {
-            static_assert(is_power_of_two<warp_size>::value, "Warp size must be an exact power of 2.");
+            static_assert(is_power_of_two<scan_warp_size>::value, "Warp size must be an exact power of 2.");
 
-            const int warp_max = _details::warp_size - 1;
+            const int warp_max = _details::scan_warp_size - 1;
             const int lidx = tidx.local[0];
-            const int warp_id = lidx >> log2<warp_size>::value;
+            const int warp_id = lidx >> log2<scan_warp_size>::value;
 
             // Step 1: Intra-warp scan in each warp
             auto val = scan_warp<_Mode, _BinaryOp>(tile_data, lidx, op);
@@ -700,10 +701,10 @@ namespace amp_algorithms
     template <int TileSize, scan_mode _Mode, typename _BinaryFunc, typename InputIndexableView>
     inline void scan(const concurrency::accelerator_view& accl_view, const InputIndexableView& input_view, InputIndexableView& output_view, const _BinaryFunc& op)
     {
-        static_assert(TileSize >= _details::warp_size, "Tile size must be at least the size of a single warp.");
-        static_assert(TileSize % _details::warp_size == 0, "Tile size must be an exact multiple of warp size.");
-        static_assert(TileSize <= (_details::warp_size * _details::warp_size), "Tile size must less than or equal to the square of the warp size.");
-        assert(output_view.extent[0] >= _details::warp_size);
+        static_assert(TileSize >= _details::scan_warp_size, "Tile size must be at least the size of a single warp.");
+        static_assert(TileSize % _details::scan_warp_size == 0, "Tile size must be an exact multiple of warp size.");
+        static_assert(TileSize <= (_details::scan_warp_size * _details::scan_warp_size), "Tile size must less than or equal to the square of the warp size.");
+        assert(output_view.extent[0] >= _details::scan_warp_size);
 
         typedef InputIndexableView::value_type T;
 
@@ -762,25 +763,25 @@ namespace amp_algorithms
     template <typename IndexableView>
     void scan_exclusive(const concurrency::accelerator_view& accl_view, const IndexableView& input_view, IndexableView& output_view)
     {
-        scan<_details::default_tile_size, amp_algorithms::scan_mode::exclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
+        scan<_details::scan_default_tile_size, amp_algorithms::scan_mode::exclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
     }
 
     template <typename IndexableView>
     void scan_exclusive(const IndexableView& input_view, IndexableView& output_view)
     {
-        scan<_details::default_tile_size, amp_algorithms::scan_mode::exclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
+        scan<_details::scan_default_tile_size, amp_algorithms::scan_mode::exclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
     }
 
     template <typename IndexableView>
     void scan_inclusive(const concurrency::accelerator_view& accl_view, const IndexableView& input_view, IndexableView& output_view)
     {
-        scan<_details::default_tile_size, amp_algorithms::scan_mode::inclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
+        scan<_details::scan_default_tile_size, amp_algorithms::scan_mode::inclusive>(accl_view, input_view, output_view, amp_algorithms::plus<IndexableView::value_type>());
     }
 
     template <typename IndexableView>
     void scan_inclusive(const IndexableView& input_view, IndexableView& output_view)
     {
-        scan<_details::default_tile_size, amp_algorithms::scan_mode::inclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
+        scan<_details::scan_default_tile_size, amp_algorithms::scan_mode::inclusive>(_details::auto_select_target(), input_view, output_view, amp_algorithms::plus<typename IndexableView::value_type>());
     }
 
     //----------------------------------------------------------------------------
