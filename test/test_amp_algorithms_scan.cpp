@@ -59,7 +59,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_single_warp)
         {
             std::vector<int> input(warp_size, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -72,7 +72,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_single_warp)
         {
             std::vector<int> input(warp_size, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -85,7 +85,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_multi_warp)
         {
             std::vector<int> input(max_tile_size, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -98,7 +98,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_multi_warp)
         {
             std::vector<int> input(max_tile_size, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -111,7 +111,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_multi_tile)
         {
             std::vector<int> input(warp_size * 4, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -124,7 +124,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_multi_tile)
         {
             std::vector<int> input(warp_size * 4, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -137,7 +137,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_multi_warp_multi_tile)
         {
             std::vector<int> input(warp_size * 4 * 4, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -150,7 +150,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_multi_warp_multi_tile)
         {
             std::vector<int> input(warp_size * 4 * 4, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -163,7 +163,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_incomplete_warp)
         {
             std::vector<int> input(warp_size + 2, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -176,7 +176,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_incomplete_warp)
         {
             std::vector<int> input(warp_size + 2, 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -189,7 +189,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_exclusive_recursive_scan)
         {
             std::vector<int> input(warp_size * (warp_size + 2), 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 0);
 
@@ -202,7 +202,7 @@ namespace amp_algorithms_tests
         TEST_METHOD(amp_scan_inclusive_recursive_scan)
         {
             std::vector<int> input(warp_size * (warp_size + 2), 1);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             std::iota(begin(expected), end(expected), 1);
 
@@ -217,7 +217,7 @@ namespace amp_algorithms_tests
             std::array<int, 12> input_data = { 1, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1 };
             std::vector<int> input(32);
             std::copy(begin(input_data), end(input_data), begin(input));
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             scan_sequential_exclusive(begin(input), end(input), begin(expected));
 
@@ -232,7 +232,7 @@ namespace amp_algorithms_tests
             const int tile_size = warp_size * 4;
             std::vector<int> input(tile_size * (tile_size + 10));
             generate_data(input);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> expected(input.size());
             scan_sequential_exclusive(begin(input), end(input), begin(expected));
 
@@ -247,7 +247,7 @@ namespace amp_algorithms_tests
             const int tile_size = warp_size * 4;
             std::vector<int> input(tile_size * (tile_size + 10));
             generate_data(input);
-            concurrency::array_view<int, 1> input_vw(input.size(), input);
+            concurrency::array_view<int, 1> input_vw(int(input.size()), input);
             std::vector<int> result(input.size(), -1);
             std::vector<int> expected(input.size());
             scan_sequential_inclusive(begin(input), end(input), begin(expected));

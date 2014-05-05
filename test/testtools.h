@@ -21,8 +21,6 @@
 
 #pragma once
 
-//#define NOMINMAX
-
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -76,6 +74,7 @@ namespace testtools
         str << "Running '" << test_name << "' tests on '" <<
             accelerator().description.c_str() << "', " << accelerator().device_path.c_str() << "." << std::endl;
         Logger::WriteMessage(str.str().c_str());
+        std::cout << str.str().c_str() << std::endl;
     }
 
     inline void set_default_accelerator(std::wstring test_name)
