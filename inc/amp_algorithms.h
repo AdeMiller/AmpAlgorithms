@@ -608,7 +608,7 @@ namespace amp_algorithms
     // TODO: There may be some better scan implementations that are described in the second reference. Investigate.
     // TODO: Scan only supports Rank of 1.
     // TODO: Scan does not support segmented scan or forwards/backwards.
-    // TODO: Scan uses information about the warp size. Consider using an algorithm that does not need to use this.
+    // TODO: IMPORTANT! Scan uses information about the warp size. Consider using an algorithm that does not need to use this.
 
     enum class scan_mode : int
     {
