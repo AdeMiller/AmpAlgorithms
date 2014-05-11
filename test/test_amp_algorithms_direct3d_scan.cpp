@@ -33,7 +33,7 @@ namespace amp_algorithms_direct3d_details_tests
     // This tests an inlined function so don't exclude this from coverage.
     TEST_CLASS(amp_direct3d_details_tests)
     {
-        TEST_METHOD(amp_details_check_hresult)
+        TEST_METHOD_CATEGORY(amp_details_check_hresult, "amp::direct3d")
         {
             try
             {
@@ -60,7 +60,7 @@ namespace amp_algorithms_direct3d_tests
     struct bitvector;
 
     TEST_CLASS_CATEGORY(amp_direct3d_scan_tests, "amp::direct3d")
-    
+    // {
         // Run smaller array sizes in debug mode as the REF accelerator is much slower.
         static const int max_debug_cols = 252;
         static const int max_debug_rows = 3;

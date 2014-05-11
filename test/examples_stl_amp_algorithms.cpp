@@ -32,8 +32,8 @@ using namespace amp_stl_algorithms;
 
 namespace examples
 {
-    TEST_CLASS(stl_examples)
-    {
+    TEST_CLASS_CATEGORY(amp_examples, "examples")
+    // {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
             testtools::set_default_accelerator(L"stl_examples");

@@ -31,8 +31,8 @@ using namespace testtools;
 
 namespace amp_algorithms_tests
 {
-    TEST_CLASS(amp_sort_tests)
-    {
+    TEST_CLASS_CATEGORY(amp_sort_tests, "amp")
+    // {
         TEST_CLASS_INITIALIZE(initialize_tests)
         {
             set_default_accelerator(L"amp_sort_tests");

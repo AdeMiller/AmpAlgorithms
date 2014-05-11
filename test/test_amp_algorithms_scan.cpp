@@ -37,7 +37,8 @@ namespace amp_algorithms_tests
     }
 
     TEST_CLASS_CATEGORY(amp_scan_tests, "amp")
-    
+    // {
+
     private:
 
         // This is to allow the tests to pass when run on the REF accelerator. In all other cases the warp 
