@@ -436,7 +436,7 @@ namespace amp_algorithms
         }
 
         template<typename T>
-        inline void merge_bins(const T* left, const T*  right, const int bin_count) restrict(amp)
+        inline void merge_bins(T* const left, const T* const right, const int bin_count) restrict(amp)
         {
             for (int b = 0; b < bin_count; ++b)
             {
@@ -455,12 +455,13 @@ namespace amp_algorithms
             static const int elements_per_thread = 1;          // TODO: Doesn't have to be a constant?
 
             // histogram all elements in a block
-            concurrency::array<unsigned> histogram_bins(bin_count);
+            concurrency::array<unsigned> histogram_bins(bin_count);  // TODO: Need to add accelerator view.
+            concurrency::array_view<unsigned> histogram_bins_vw(histogram_bins);
 
             concurrency::tiled_extent<tile_size> compute_domain = input_view.get_extent().tile<tile_size>().pad();
 
             concurrency::parallel_for_each(compute_domain,
-                [=, &histogram_bins](concurrency::tiled_index<tile_size> tidx) restrict(amp)
+                [=](concurrency::tiled_index<tile_size> tidx) restrict(amp)
             {
                 // Each thread has its own histogram
                 tile_static unsigned tile_bins[tile_size][bin_count];
@@ -473,7 +474,7 @@ namespace amp_algorithms
                 {
                     for (int b = 0; b < bin_count; ++b)
                     {
-                        histogram_bins(b) = 0;
+                        histogram_bins_vw[b] = 0;
                     }
                 }
 
@@ -484,13 +485,10 @@ namespace amp_algorithms
                 }
 
                 // Increment bins for each element.
-                for (int i = start_elem; i < (start_elem + elements_per_thread); ++i)
+                if (gidx < input_view.extent[0])
                 {
-                    if (gidx < input_view.extent[0])
-                        tile_bins[idx][_details::radix_key_value<T, key_bit_width>(input_view[gidx], key_idx)]++;
+                    tile_bins[idx][_details::radix_key_value<T, key_bit_width>(input_view[gidx], key_idx)]++;
                 }
-
-                // Wait for all threads to finish incrementing.
                 tidx.barrier.wait();
 
                 // TODO: This could be more efficient. Don't do it all on one thread.
@@ -507,37 +505,45 @@ namespace amp_algorithms
                     // Thread zero copies and merges data with global histogram.
                     for (int b = 0; b < bin_count; ++b)
                     {
-                        concurrency::atomic_fetch_add(&histogram_bins(b), tile_bins[0][b]);
+                        concurrency::atomic_fetch_add(&histogram_bins_vw(b), tile_bins[0][b]);
                     }
+
+                    _details::scan_tile<tile_size, amp_algorithms::scan_mode::exclusive>(tile_bins[0], tidx, amp_algorithms::plus<T>());
                 }
+                tidx.barrier.wait();
+
+                // Sort elements in each tile.
+
+                //const int d = ;
+                //sorted_tile[i] = input_view[d];
+
             });
 
 #if _DEBUG
             {
                 std::vector<unsigned> bins(4);
-                concurrency::copy(histogram_bins, begin(bins));
+                concurrency::copy(histogram_bins_vw, begin(bins));
             }
 #endif
-            // TODO: This scan supports multi-tile. Probably need a simpler version that uses only one tile.
-            amp_algorithms::scan_new<tile_size, scan_mode::exclusive>(histogram_bins, histogram_bins, amp_algorithms::plus<unsigned int>());
+            amp_algorithms::scan<tile_size, scan_mode::exclusive>(histogram_bins_vw, histogram_bins_vw, amp_algorithms::plus<unsigned int>());
 #if _DEBUG
             {
                 std::vector<unsigned> scans(4);
-                concurrency::copy(histogram_bins, begin(scans));
+                concurrency::copy(histogram_bins_vw, begin(scans));
             }
 #endif
-            // Sort elements for each tile to maximize memory affinity when writing to global memory.
+            // Sort elements for each tile according to the radix to maximize memory affinity when writing to global memory.
 
-            // reorder the elements based on the offsets.
 
-            concurrency::parallel_for_each(compute_domain,
-                [=, &histogram_bins](concurrency::tiled_index<tile_size> tidx) restrict(amp)
+            // Reorder the elements based on the offsets.
+
+            concurrency::parallel_for_each(compute_domain, [=](concurrency::tiled_index<tile_size> tidx) restrict(amp)
             {
                 const int gidx = tidx.global[0];
                 const int idx = tidx.local[0];
 
-                const int d = idx - 0;
-                output_view[d] = input_view[d];
+                const int d = tile_bins[] + /* local offset +  */ histogram_bins_vw[tidx.tile];
+                output_view[gidx] = input_view[d];
             });
         }
     }
@@ -709,7 +715,7 @@ namespace amp_algorithms
         typedef InputIndexableView::value_type T;
 
         auto compute_domain = output_view.extent.tile<TileSize>().pad();
-        concurrency::array<T, 1> tile_results(compute_domain / TileSize);
+        concurrency::array<T, 1> tile_results(compute_domain / TileSize, accl_view);
         concurrency::array_view<T, 1> tile_results_vw(tile_results);
         // 1 & 2. Scan all tiles and store results in tile_results.
         concurrency::parallel_for_each(accl_view, compute_domain, [=](concurrency::tiled_index<TileSize> tidx) restrict(amp)
@@ -731,7 +737,7 @@ namespace amp_algorithms
         });
 
         // 3. Scan tile results.
-        if (tile_results.extent[0] > TileSize)
+        if (tile_results_vw.extent[0] > TileSize)
         {
             scan<TileSize, amp_algorithms::scan_mode::exclusive>(accl_view, tile_results_vw, tile_results_vw, op);
         }
