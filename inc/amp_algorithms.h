@@ -319,6 +319,32 @@ namespace amp_algorithms
 
     // TODO: Implement not1() and not2() if appropriate.
 
+    //----------------------------------------------------------------------------
+    // Byte pack and unpack
+    //----------------------------------------------------------------------------
+
+    template<int index>
+    inline unsigned pack_byte(const unsigned value) restrict(cpu, amp)
+    {
+        return (value && 0xFF) << (index * 8);
+    }
+
+    inline unsigned pack_byte(const unsigned value, unsigned index) restrict(cpu, amp)
+    {
+        return (value && 0xFF) << (index * 8);
+    }
+
+    template<int index>
+    inline unsigned unpack_byte(const unsigned value) restrict(cpu, amp)
+    {
+        return (value >> (index * 8)) & 0xFF;
+    }
+
+    inline unsigned unpack_byte(const unsigned value, unsigned index) restrict(cpu, amp)
+    {
+        return (value >> (index * 8)) & 0xFF;
+    }
+
 #pragma endregion
 
     //----------------------------------------------------------------------------
@@ -406,7 +432,9 @@ namespace amp_algorithms
     //----------------------------------------------------------------------------
     // radix_sort
     //----------------------------------------------------------------------------
-    // http://www.heterogeneouscompute.org/wordpress/wp-content/uploads/2011/06/RadixSort.pdf
+    // "Introduction to GPU Radix Sort" http://www.heterogeneouscompute.org/wordpress/wp-content/uploads/2011/06/RadixSort.pdf
+    // "Designing Efficient Sorting Algorithms for Manycore GPUs" http://www.nvidia.com/docs/io/67073/nvr-2008-001.pdf
+    // https://www.cs.auckland.ac.nz/software/AlgAnim/radixsort.html
     //
     // http://www.intel.com/content/www/us/en/research/intel-labs-radix-sort-mic-report.html
     // http://www.cse.uconn.edu/~huang/fall12_5304/Presentation_Final/GPU_Sorting.pdf
@@ -414,7 +442,6 @@ namespace amp_algorithms
     // http://xxx.lanl.gov/pdf/1008.2849
     // http://www.rebe.rau.ro/RePEc/rau/jisomg/WI12/JISOM-WI12-A11.pdf
     //
-    // "Designing Efficient Sorting Algorithms for Manycore GPUs" http://www.nvidia.com/docs/io/67073/nvr-2008-001.pdf
     //
     // "Histogram Calculation in CUDA" http://docs.nvidia.com/cuda/samples/3_Imaging/histogram/doc/histogram.pdf
     //
@@ -422,17 +449,26 @@ namespace amp_algorithms
     namespace _details
     {
         template<typename T, int key_bit_width>
-        int radix_key_value(const T value, const unsigned key_idx) restrict(amp, cpu)
+        inline int radix_key_value(const T value, const unsigned key_idx) restrict(amp, cpu)
         {
             const T mask = (1 << key_bit_width) - 1;
             const unsigned key_offset = key_idx * key_bit_width;
-            return (value & (mask << key_offset)) >> key_offset;
+            return (value >> key_offset) & mask;
         }
 
         // TODO: T is limited to only integer types. Need to modify the template to restrict this.
         template <typename T, int key_bit_width, int tile_size>
         void radix_sort(const concurrency::accelerator_view& accl_view, concurrency::array_view<T>& input_view)
         {
+        }
+
+        template <typename T>
+        inline void initialize_bins(T* const bin_data, const int bin_count) restrict(amp)
+        {
+            for (int b = 0; b < bin_count; ++b)
+            {
+                bin_data[b] = T(0);
+            }
         }
 
         template<typename T>
@@ -445,10 +481,60 @@ namespace amp_algorithms
         }
 
         template <typename T, int key_bit_width, int tile_size>
-        void radix_sort_key(const concurrency::array_view<T>& input_view, concurrency::array_view<T>& output_view, const int key_idx)
+        void radix_sort_tile_by_key(T* const tile_data, concurrency::tiled_index<tile_size> tidx, const int key_idx) restrict(amp)
         {
-            static const unsigned type_width = sizeof(T)* 8;
-            static_assert((type_width % key_bit_width == 0), "The sort key width must be an exact multiple of the type width.");
+            static_assert((tile_size <= 256), "The tile size must be less than or equal to 256.");
+            static_assert((key_bit_width >=1), "The radix bit width must be greater than or equal to one.");
+            static_assert((key_bit_width <= 2), "The radix bit width must be less than or equal to two.");
+
+            const unsigned bin_count = 1 << key_bit_width;
+            const int idx = tidx.local[0];
+
+            // Increment histogram bins for each element.
+
+            tile_static unsigned tile_radix_values[tile_size];
+            int radix_value = _details::radix_key_value<T, key_bit_width>(tile_data[idx], key_idx);  // TODO: Get rid of this and recalculate?
+            tile_radix_values[idx] = pack_byte(1, radix_value);
+
+            tidx.barrier.wait_with_tile_static_memory_fence();
+
+            tile_static unsigned histogram_bins_scan[bin_count];
+            if (idx == 0)
+            {
+                // Calculate histogram of radix values.
+
+                unsigned histogram_bins = 0;
+                for (int i = 0; i < tile_size; ++i)
+                {
+                    histogram_bins += tile_radix_values[i];
+                }
+
+                // Scan to get offsets for each histogram bin.
+
+                histogram_bins_scan[0] = 0;
+                histogram_bins_scan[1] = unpack_byte<0>(histogram_bins);
+                if (key_bit_width > 1)
+                {
+                    histogram_bins_scan[2] = unpack_byte<1>(histogram_bins) + histogram_bins_scan[1];
+                    histogram_bins_scan[3] = unpack_byte<2>(histogram_bins) + histogram_bins_scan[2];
+                }
+            }
+            _details::scan_tile<tile_size, amp_algorithms::scan_mode::exclusive>(tile_radix_values, tidx, amp_algorithms::plus<T>());
+
+            // Shuffle data into sorted order.
+
+            T tmp = tile_data[idx];
+            tidx.barrier.wait_with_tile_static_memory_fence();
+            int offset = histogram_bins_scan[radix_value] + unpack_byte(tile_radix_values[idx], radix_value);
+            tile_data[offset] = tmp;
+        }
+
+        template <typename T, int key_bit_width, int tile_size>
+        void radix_sort_by_key(const concurrency::array_view<T>& input_view, concurrency::array_view<T>& output_view, const int key_idx)
+        {
+            static const unsigned type_width = sizeof(T) * 8;
+            static_assert((type_width % key_bit_width == 0), "The sort key width must be divisible by the type width.");
+            static_assert((key_bit_width % 2 == 0), "The key bit width must be divisible by two.");
 
             static const unsigned bin_count = 1 << key_bit_width;
             static const T bin_mask = bin_count - 1;
@@ -460,11 +546,11 @@ namespace amp_algorithms
 
             concurrency::tiled_extent<tile_size> compute_domain = input_view.get_extent().tile<tile_size>().pad();
 
-            concurrency::parallel_for_each(compute_domain,
-                [=](concurrency::tiled_index<tile_size> tidx) restrict(amp)
+            concurrency::parallel_for_each(compute_domain, [=, &histogram_bins](concurrency::tiled_index<tile_size> tidx) restrict(amp)
             {
                 // Each thread has its own histogram
                 tile_static unsigned tile_bins[tile_size][bin_count];
+                tile_static T tile_data[tile_size];
                 const int gidx = tidx.global[0];
                 const int idx = tidx.local[0];
                 const int start_elem = idx * elements_per_thread;
@@ -472,24 +558,16 @@ namespace amp_algorithms
                 // One thread initializes the global histogram bins.
                 if (gidx == 0)
                 {
-                    for (int b = 0; b < bin_count; ++b)
-                    {
-                        histogram_bins_vw[b] = 0;
-                    }
+                    //initialize_bins(histogram_bins_vw[b], bin_count);
                 }
-
-                // Initialize bins for this thread
-                for (int b = 0; b < bin_count; ++b)
-                {
-                    tile_bins[idx][b] = 0u;
-                }
+                initialize_bins(tile_bins[idx], bin_count);
 
                 // Increment bins for each element.
                 if (gidx < input_view.extent[0])
                 {
                     tile_bins[idx][_details::radix_key_value<T, key_bit_width>(input_view[gidx], key_idx)]++;
                 }
-                tidx.barrier.wait();
+                tidx.barrier.wait_with_tile_static_memory_fence();
 
                 // TODO: This could be more efficient. Don't do it all on one thread.
                 if (idx == 0)
@@ -508,42 +586,35 @@ namespace amp_algorithms
                         concurrency::atomic_fetch_add(&histogram_bins_vw(b), tile_bins[0][b]);
                     }
 
-                    _details::scan_tile<tile_size, amp_algorithms::scan_mode::exclusive>(tile_bins[0], tidx, amp_algorithms::plus<T>());
+                    //_details::scan_tile<tile_size, amp_algorithms::scan_mode::exclusive>(tile_bins[0], tidx, amp_algorithms::plus<T>());
                 }
+
+                // Sort tiles by 
                 tidx.barrier.wait();
+                for (int i = 0; i < (key_bit_width / 2); ++i)
+                {
+                    radix_sort_tile_by_key<T, 2, tile_size>(tile_data, tidx, i);
+                }
 
-                // Sort elements in each tile.
+                // Shuffle data into sorted order.
 
-                //const int d = ;
-                //sorted_tile[i] = input_view[d];
-
+                const T tmp = tile_data[idx];
+                tidx.barrier.wait_with_tile_static_memory_fence();
+                //int offset = idx - tile_bins[tmp];
+                //input_view[offset] = tmp;
             });
 
-#if _DEBUG
-            {
-                std::vector<unsigned> bins(4);
-                concurrency::copy(histogram_bins_vw, begin(bins));
-            }
-#endif
             amp_algorithms::scan<tile_size, scan_mode::exclusive>(histogram_bins_vw, histogram_bins_vw, amp_algorithms::plus<unsigned int>());
-#if _DEBUG
-            {
-                std::vector<unsigned> scans(4);
-                concurrency::copy(histogram_bins_vw, begin(scans));
-            }
-#endif
-            // Sort elements for each tile according to the radix to maximize memory affinity when writing to global memory.
-
 
             // Reorder the elements based on the offsets.
-
             concurrency::parallel_for_each(compute_domain, [=](concurrency::tiled_index<tile_size> tidx) restrict(amp)
             {
                 const int gidx = tidx.global[0];
                 const int idx = tidx.local[0];
 
-                const int d = tile_bins[] + /* local offset +  */ histogram_bins_vw[tidx.tile];
-                output_view[gidx] = input_view[d];
+                // TODO: Will this work if the input and output views overlap or are the same?
+                //const int d = tile_bins[] + /* local offset +  */ histogram_bins_vw[tidx.tile];
+                //output_view[gidx] = input_view[d];
             });
         }
     }

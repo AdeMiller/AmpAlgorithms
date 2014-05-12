@@ -284,15 +284,20 @@ namespace testtools
         if (expected_count != actual_count)
         {
             return false;
-        }   
+        }
+
+        bool is_same = true;
         for (int i = 0; i < int(expected_count); ++i)
         {
+            std::ostringstream stream;
+            stream << " [ " << i << " ] : " << expected[i] << " = " << actual[i] << std::endl;
+            Logger::WriteMessage(stream.str().c_str());
             if (expected[i] != actual[i])
             {
-                return false;
+                is_same = false;
             }
         }
-        return true;
+        return is_same;
     }
 
     //===============================================================================
