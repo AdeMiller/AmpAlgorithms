@@ -123,6 +123,7 @@ namespace amp_algorithms_tests
             Assert::IsTrue(are_equal(expected, input_av));
         }
 
+#ifdef _DEBUG
         TEST_METHOD(amp_details_radix_sort_by_key)
         {
             std::array<unsigned, 16> input  =    { 1,  2,  6,  3,  0, 13, 10, 11,  5, 10, 14, 15,  4, 12,  8,  9 };
@@ -136,6 +137,7 @@ namespace amp_algorithms_tests
 
             Assert::IsTrue(are_equal(expected, output_av));
         }
+#endif
     };
 }; // namespace amp_algorithms_tests
 

@@ -26,9 +26,8 @@
 #pragma once
 
 #include <amp.h>
-#include <wrl\client.h>
 
-#include <xx_amp_algorithms_impl.h>
+#include <xx_amp_algorithms_direct3d_impl.h>
 #include <amp_indexable_view.h>
 
 namespace amp_algorithms
@@ -39,12 +38,13 @@ namespace amp_algorithms
 
     namespace direct3d
     {
+        // direct3d namespace has its own declarations of scan_mode and scan_direction.
+
         enum class scan_mode : int
         {
             exclusive = 0,
             inclusive = 1
         };
-
         // TODO: Duplicated in both amp and direct3d namespaces. Fix this?
         enum class scan_direction : int
         {

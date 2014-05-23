@@ -21,6 +21,7 @@
 #include "stdafx.h"
 
 #include <amp_algorithms.h>
+#include <xx_amp_algorithms_impl_inl.h>
 #include <amp_stl_algorithms.h>
 
 #include "testtools.h"
